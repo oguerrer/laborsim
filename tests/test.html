@@ -27,9 +27,9 @@
 
     require(['require', 'tests/lib/mocha', 'chai'], function(require, m, chai){
       mocha.setup('bdd');
-        // require(['tests/suite'], function(){
+        require(['tests/events'], function(){
           mocha.run();
-        // });
+        });
   });
 </script>
 </head>
