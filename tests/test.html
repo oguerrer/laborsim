@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <link rel="stylesheet" href="lib/mocha.css"/>
+  <script type="text/javascript" src="../js/lib/require.js"></script>
+
+  <script type="text/javascript">
+    require.config(
+    {
+      baseUrl:'../js',
+      paths: {
+        tests:      '../tests',
+        underscore: 'lib/underscore',
+        jquery:     'lib/jquery',
+        random:     'lib/random',
+        d3:         'lib/d3',
+        chai:       '../tests/lib/chai'
+      },
+      shim: {
+        "chai": {
+          exports: "chai",
+          deps: ["tests/lib/mocha"]
+        }
+      }
+    }
+    );
+
+    require(['require', 'tests/lib/mocha', 'chai'], function(require, m, chai){
+      mocha.setup('bdd');
+        // require(['tests/suite'], function(){
+          mocha.run();
+        // });
+  });
+</script>
+</head>
+<body>
+  <h1>LaborFlows Test Suite</h1>
+  <div id="mocha"></div>
+</body>
+</html>
