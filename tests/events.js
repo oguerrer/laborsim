@@ -82,7 +82,7 @@ describe("Events", function() {
         }
         for(n = eventsNum-1; n >= 0; n-- ){
           i = obj.trigger(types[n]);
-          expect(ty[n]).to.be.equal(i);
+          expect(ty[n]).to.be.equal(+i);
         }
         i = callbacksNum;
         while(--i){

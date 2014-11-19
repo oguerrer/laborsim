@@ -26,7 +26,10 @@ define(["underscore"], function(_){
    * myObj.off("start", l);
    * ```
    *
-   * These methods will not be chainable
+   * These methods can be chained
+   *
+   * @todo: document chaining and return types
+   *
    */
   function addEvents (obj, types) {
     ;(function () {
@@ -38,6 +41,20 @@ define(["underscore"], function(_){
        */
 
       var listeners = {};
+
+      function wrapInt (i) {
+        return addApi({
+                  stillAlive: i,
+                  valueOf: function(){ return i; }
+                });
+      }
+
+      function addApi (obj) {
+        obj.on      = subscribe;
+        obj.off     = unsubscribe;
+        obj.trigger = publish;
+        return obj;
+      }
 
       /**
        * subscribe a listener of an event type
@@ -54,7 +71,7 @@ define(["underscore"], function(_){
           var len = 0;
           for(var l in listeners)
             len += listeners[l].length;
-          return len;
+          return wrapInt(len);
         }
 
         if ( !listeners[type] ) {
@@ -62,10 +79,10 @@ define(["underscore"], function(_){
         }
         if ( callback ){
           listeners[type].unshift(callback);
-          return callback;
+          return addApi(callback);
         }
 
-        return listeners[type].length;
+        return wrapInt(listeners[type].length);
       };
 
       /**
@@ -99,30 +116,30 @@ define(["underscore"], function(_){
             queue.splice(len, 1);
         }
 
-        return queue.length;
+        return wrapInt(queue.length);
       };
 
       var unsubscribe = function( type, listener ) {
 
         if ( arguments.length < 1 ){
           listeners = {};
-          return 0;
+          return wrapInt(0);
         }
 
         if ( listeners[type] ) {
           if ( arguments.length == 1 ){
             var len = listeners[type].length;
             listeners[type] = [];
-            return len;
+            return wrapInt(len);
           } else {
             var queue = listeners[type];
             for ( var i in queue ) {
               if ( queue[i] === listener ) {
                 queue.splice( i, 1 );
-                return queue.length;
+                return wrapInt(queue.length);
               }
             }
-            return queue.length;
+            return wrapInt(queue.length);
           }
         } else throw Error("Trying to unsubscribe from unknown type '"+ type + "'.");
 
@@ -136,9 +153,7 @@ define(["underscore"], function(_){
         obj.events[types[i]] = _.partial(publish, types[i]);
       }
 
-      obj.on      = subscribe;
-      obj.off     = unsubscribe;
-      obj.trigger = publish;
+      addApi(obj);
 
     }());
 
