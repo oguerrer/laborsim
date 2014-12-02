@@ -42,12 +42,15 @@ define(["underscore"], function(_){
 
       var listeners = {};
 
-      function wrapInt (i) {
-        return addApi({
-                  stillAlive: i,
-                  valueOf: function(){ return i; }
-                });
+      function eventInt (i) {
+        this.stillAlive = i;
       }
+
+      eventInt.prototype.valueOf = function(){ return this.stillAlive; };
+      eventInt.prototype.on      = subscribe;
+      eventInt.prototype.off     = unsubscribe;
+      eventInt.prototype.trigger = publish;
+
 
       function addApi (obj) {
         obj.on      = subscribe;
@@ -71,7 +74,7 @@ define(["underscore"], function(_){
           var len = 0;
           for(var l in listeners)
             len += listeners[l].length;
-          return wrapInt(len);
+          return new eventInt(len);
         }
 
         if ( !listeners[type] ) {
@@ -82,7 +85,7 @@ define(["underscore"], function(_){
           return addApi(callback);
         }
 
-        return wrapInt(listeners[type].length);
+        return new eventInt(listeners[type].length);
       };
 
       /**
@@ -99,7 +102,7 @@ define(["underscore"], function(_){
        */
       var publish = function( type, args ) {
 
-        if ( !listeners[type] ) {
+        if ( !(_(listeners).has(type)) ) {
           throw Error("Undefined event type '"+type+"' triggered.");
         }
 
@@ -107,8 +110,11 @@ define(["underscore"], function(_){
             len = queue ? queue.length : 0;
 
         args = args || {};
-        if ( args.type !== undefined ) console.warn("Overwriting type property of an event");
+        if ( _(args).has("type") ) console.warn("Overwriting 'type' property of an event");
         args.type = type;
+        if ( _(args).has("eventSource") ) console.warn("Overwriting 'eventSource' property of an event");
+        args.eventSource = this;
+        // console.log("EVENT", type, args.eventSource);
 
         // going backwards, removing an item does not alter the index of the ones coming before it
         while (len--) {
@@ -116,30 +122,32 @@ define(["underscore"], function(_){
             queue.splice(len, 1);
         }
 
-        return wrapInt(queue.length);
+        return new eventInt(queue.length);
       };
 
       var unsubscribe = function( type, listener ) {
 
         if ( arguments.length < 1 ){
-          listeners = {};
-          return wrapInt(0);
+          for ( var t in listeners ) {
+            listeners[t] = [];
+          }
+          return new eventInt(0);
         }
 
         if ( listeners[type] ) {
           if ( arguments.length == 1 ){
             var len = listeners[type].length;
             listeners[type] = [];
-            return wrapInt(len);
+            return new eventInt(len);
           } else {
             var queue = listeners[type];
             for ( var i in queue ) {
               if ( queue[i] === listener ) {
                 queue.splice( i, 1 );
-                return wrapInt(queue.length);
+                return new eventInt(queue.length);
               }
             }
-            return wrapInt(queue.length);
+            return new eventInt(queue.length);
           }
         } else throw Error("Trying to unsubscribe from unknown type '"+ type + "'.");
 
