@@ -26,7 +26,7 @@ define(["underscore"], function(_){
    * myObj.off("start", l);
    * ```
    *
-   * These methods can be chained
+   * These methods cannot be chained
    *
    * @todo: document chaining and return types
    *
@@ -42,21 +42,21 @@ define(["underscore"], function(_){
 
       var listeners = {};
 
-      function eventInt (i) {
-        this.stillAlive = i;
+
+      function getQueue ( type ) {
+        if (_(listeners).has(type))
+          return listeners[type];
+        else throw Error("Unknown event type '"+type+"'");
       }
 
-      eventInt.prototype.valueOf = function(){ return this.stillAlive; };
-      eventInt.prototype.on      = subscribe;
-      eventInt.prototype.off     = unsubscribe;
-      eventInt.prototype.trigger = publish;
-
-
-      function addApi (obj) {
-        obj.on      = subscribe;
-        obj.off     = unsubscribe;
-        obj.trigger = publish;
-        return obj;
+      function stillOn ( type ) {
+        if( arguments.length === 0 || type === undefined ){
+          var len = 0;
+          for(var l in listeners)
+            len += listeners[l].length;
+          return len;
+        }
+        return getQueue(type).length;
       }
 
       /**
@@ -68,25 +68,18 @@ define(["underscore"], function(_){
        *
        * @throws Error when `type` is not among the defined event types
        */
-      var subscribe = function( type, callback ) {
+      function subscribe ( type, callback ) {
 
-        if( arguments.length === 0){
-          var len = 0;
-          for(var l in listeners)
-            len += listeners[l].length;
-          return new eventInt(len);
+        // subscribe() / subscribe(type) -> num of listeners on type
+        if( arguments.length < 2 ){
+          return stillOn();
         }
 
-        if ( !listeners[type] ) {
-          throw Error("Trying to subscribe to undefined event type '"+type+"'.");
-        }
-        if ( callback ){
-          listeners[type].unshift(callback);
-          return addApi(callback);
-        }
+        // subscribe(type, callback) -> insert callback and return listener
+        getQueue(type).unshift(callback);
+        return callback;
 
-        return new eventInt(listeners[type].length);
-      };
+      }
 
       /**
        * publish an event
@@ -100,18 +93,17 @@ define(["underscore"], function(_){
        *
        * @throws Error when `type` is not among the defined event types
        */
-      var publish = function( type, args ) {
+      function publish ( type, args ) {
 
-        if ( !(_(listeners).has(type)) ) {
-          throw Error("Undefined event type '"+type+"' triggered.");
-        }
+        var queue = getQueue(type),
+            len = queue.length;
 
-        var queue = listeners[type],
-            len = queue ? queue.length : 0;
+        // efficient return if empty
+        if ( len === 0 ) return 0;
 
         args = args || {};
-        if ( _(args).has("type") ) console.warn("Overwriting 'type' property of an event");
-        args.type = type;
+        if ( _(args).has("eventType") ) console.warn("Overwriting 'eventType' property of an event");
+        args.eventType = type;
         if ( _(args).has("eventSource") ) console.warn("Overwriting 'eventSource' property of an event");
         args.eventSource = this;
         // console.log("EVENT", type, args.eventSource);
@@ -122,46 +114,46 @@ define(["underscore"], function(_){
             queue.splice(len, 1);
         }
 
-        return new eventInt(queue.length);
-      };
+        return queue.length;
+      }
 
-      var unsubscribe = function( type, listener ) {
+      function unsubscribe ( type, listener ) {
 
         if ( arguments.length < 1 ){
           for ( var t in listeners ) {
             listeners[t] = [];
           }
-          return new eventInt(0);
+          return this;
         }
 
-        if ( listeners[type] ) {
-          if ( arguments.length == 1 ){
-            var len = listeners[type].length;
-            listeners[type] = [];
-            return new eventInt(len);
-          } else {
-            var queue = listeners[type];
-            for ( var i in queue ) {
-              if ( queue[i] === listener ) {
-                queue.splice( i, 1 );
-                return new eventInt(queue.length);
-              }
+        var queue = getQueue(type);
+        if ( arguments.length == 1 ){
+          queue = [];
+          return this;
+        } else {
+          for ( var i in queue ) {
+            if ( queue[i] === listener ) {
+              queue.splice( i, 1 );
+              return this;
             }
-            return new eventInt(queue.length);
           }
-        } else throw Error("Trying to unsubscribe from unknown type '"+ type + "'.");
+          return this;
+        }
 
-      };
+      }
 
 
       obj.events = {};
       obj.events.types = types;
       for ( var i in types ) {
         listeners[types[i]] = [];
-        obj.events[types[i]] = _.partial(publish, types[i]);
+        obj.events[types[i]] = _(publish).partial(types[i]);
       }
 
-      addApi(obj);
+      obj.on      = subscribe;
+      obj.off     = unsubscribe;
+      obj.trigger = publish;
+      obj.stillOn = stillOn;
 
     }());
 
