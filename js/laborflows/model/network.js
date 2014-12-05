@@ -41,12 +41,6 @@ function Network(networkSpec){
 
   var firms = {};
   var workforce = {};
-  // var neighbors = {};
-  // var workers = {};
-  // var firmState = {};
-  // var firmParam = {};
-  // var workerState = {};
-  // var workerParam = {};
   var workerMarker = 0;
 
   var net = this;
@@ -89,8 +83,10 @@ function Network(networkSpec){
   WorkerHandle.prototype.param = function(p, v) {
     var w = workforce[this.id()];
     if(arguments.length === 2 && _(w.param).has(p)){
-      w.param[p] = v;
-      this.trigger("changed");
+      if (w.param[s] !== v){
+        w.param[p] = v;
+        this.trigger("changed");
+      }
       return this;
     }
     return w.param[p];
@@ -98,8 +94,10 @@ function Network(networkSpec){
   WorkerHandle.prototype.state = function(s, v) {
     var w = workforce[this.id()];
     if(arguments.length === 2 && _(w.state).has(s)){
-      w.state[s] = v;
-      this.trigger("changed");
+      if (w.state[s] !== v){
+        w.state[s] = v;
+        this.trigger("changed");
+      }
       return this;
     }
     return w.state[s];
@@ -171,6 +169,8 @@ function Network(networkSpec){
     var id = workerMarker++;
     var handle = new WorkerHandle(firmId, id);
     var worker = {
+      id: id,
+      firm: firms[firmId],
       handle: handle,
       state: _(spec).pick("employed"),
       param: _(spec).pick("searchingProb")
