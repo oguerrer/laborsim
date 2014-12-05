@@ -144,13 +144,13 @@ function NetView (svg, network) {
     _(network.firms()).each(function(f) {
       delete f.view[vid];
     });
-    network.off("network-change", updateView);
+    network.off("networkChange", updateView);
     svg.remove();
   };
 
   updateView();
 
-  network.on("network-change", updateView);
+  network.on("networkChange", updateView);
 }
 
 

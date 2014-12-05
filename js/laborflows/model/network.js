@@ -224,7 +224,7 @@ function Network(networkSpec){
     if ( arguments.length == 2 ) {
       _updateFirmFromSpec(id, spec);
       firm.trigger("changed", {newspec: true});
-      this.trigger("network-change", {firmsChanged: [firm]});
+      this.trigger("networkChange", {firmsChanged: [firm]});
     }
     return firm;
   };
@@ -256,7 +256,7 @@ function Network(networkSpec){
         diff.push(firm);
       }
     }
-    if(!(_(diff).isEmpty())) this.trigger("network-change", {firmsAdded: diff});
+    if(!(_(diff).isEmpty())) this.trigger("networkChange", {firmsAdded: diff});
     return this;
   };
 
@@ -270,7 +270,7 @@ function Network(networkSpec){
       delete firms[f];
       _invalidateHandle(FirmHandle, firm);
       firm.trigger("removed");
-      this.trigger("network-change", {firmsRemoved: [f]});
+      this.trigger("networkChange", {firmsRemoved: [f]});
     } else {
       console.warn("Trying to remove unknown firm '"+f+"'");
     }
@@ -337,7 +337,7 @@ function Network(networkSpec){
           diffDel.push({source: f1, target: fi});
         }
       }
-      this.trigger("network-change", {addedLinks: diffAdd, removedLinks: diffDel});
+      this.trigger("networkChange", {addedLinks: diffAdd, removedLinks: diffDel});
       return this;
     }
     throw Error("Wrong arguments passed to 'link' method");
@@ -365,7 +365,7 @@ function Network(networkSpec){
     var firm = _lookupFirm(id);
     var ws = _addWorkers(firm, wspec);
     firm.trigger("changed", {newspec: true});
-    this.trigger("network-change", {firmsChanged: [firm]});
+    this.trigger("networkChange", {firmsChanged: [firm]});
     return this;
   };
 
@@ -409,7 +409,7 @@ function Network(networkSpec){
   // @todo init code following firmsSpec
 
   // add events handling code
-  events(this, ["network-change", "simulation-step"]);
+  events(this, ["networkChange", "simulationStep"]);
 
 }
 
