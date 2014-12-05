@@ -2,35 +2,65 @@ define([
   "underscore",
   "jquery",
   "d3",
+  "random",
   "laborflows/model/network",
   "laborflows/views/netview"
-], function(_, $, d3, Network, NetView) {
+], function(_, $, d3, Random, Network, NetView) {
 
-  var svg = d3.select("svg#simulation-netview")
-      .attr("width", $(window).width())
-      .attr("height", $(window).height());
+var rand = new Random(Random.engines.mt19937().autoSeed());
 
-  var network = new Network();
+var svg = d3.select("svg#simulation-netview")
+    .attr("width", $(window).width())
+    .attr("height", $(window).height());
 
-  var firms = {};
+var network = new Network();
 
-  _(["B", "C", "D", "E"]).each(function(d) {
-    firms[d] = {workers: [
-        {num: Math.random()*10, employed: true},
-        {num: Math.random()*10, employed: false}
-      ]};
-  });
-  firms["A"] = {workers: [{num:10}, {num:10, employed:false}]};
+var firms = {};
 
-  network.addFirm(firms);
-  network.link("A", ["B", "C", "D"], true);
-  network.link("E", ["D", "B"], true);
+_(["A", "B", "C", "D", "E"]).each(function(d) {
+  firms[d] = {workers: [
+      {num: rand.integer(10,100), employed: true},
+      {num: rand.integer(10,100), employed: false}
+    ]};
+});
 
-  var view = new NetView(svg, network);
+network.addFirm(firms);
+network.firm("A").param("fireProb", 1);
+network.link("A", ["B", "C", "D"], true);
+network.link("E", ["D", "B"], true);
 
-  console.log("LaborFlows rocks");
+var view = new NetView(svg, network);
 
-  return {net: network, view: view};
-//
-// return network;
+var lastRandFirm = 0;
+$("#simulation-view").prepend('<button id="random-firms">Insert 10 random firms</button>');
+$("#random-firms").on("click", function() {
+  var rfirms = {}, i;
+
+  for( i=0; i < 10; i++ ){
+    rfirms["F"+lastRandFirm] = {workers: [
+      {num: rand.integer(10,100), employed: true},
+      {num: rand.integer(10,100), employed: false}
+    ]};
+    lastRandFirm++;
+  }
+  network.addFirm(rfirms);
+
+  var all = _(network.firms()).values();
+  for( i in rfirms ){
+    network.link(i, rand.sample(all, rand.integer(1, Math.min(3, all.length))), true);
+  }
+});
+
+$("#simulation-view").prepend('<button id="toggle-simulation">Start/stop</button>');
+$("#toggle-simulation").on("click", function() {
+  if(view.running())
+    view.stop();
+  else
+    view.start();
+});
+
+console.log("LaborFlows rocks");
+
+return {net: network, view: view};
+
 });
