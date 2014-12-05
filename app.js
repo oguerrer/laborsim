@@ -10,3 +10,6 @@ require.config({
 });
 
 requirejs(['main']);
+// For testing in the console:
+var app;
+require(["main"], function(m) { app = m; });
