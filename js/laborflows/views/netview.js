@@ -15,23 +15,40 @@ function percSize (min, max, size, tot) {
     return min + ( size / tot * ( max - min ) );
   }
 }
-var colormap = chroma.scale("Set1");
+var colormap = chroma.scale(["red", "green", "blue"]);
 
-function NetView (svg, network) {
+function NetView (svg, network, config) {
+
+  var conf = _(config || {}).clone();
+  _(conf).defaults({
+    minFirmSize: 10,
+    avgFirmSize: 20,
+    animationDuration: 200
+  });
 
   var vid = "netview" + (vidMarker++);
   this.id = function() {return vid;};
   this.c = chroma;
 
-  // svg = d3.select(svg);
-  var width = svg.attr("width"),
-      height = svg.attr("height");
+  var container = svg;
+  var width = container.attr("width"),
+      height = container.attr("height");
 
-  svg = svg.append("g");
+  svg = container.append("g");
   svg.attr("transform", "translate("+(width/2)+","+(height/2)+")");
 
+  var zoom = d3.behavior.zoom()
+      .scaleExtent([-10, 10])
+      .translate([width/2 , height/2])
+      .on("zoom", function() {
+        svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+      });
+  container.call(zoom);
+
+
   var force = d3.layout.force()
-      .charge(function(d){return -100*(d.r || 10);})
+      // .charge(-40*conf.avgFirmSize)
+      .charge(function(d) {return -10*d.firm.numOfAffiliates();})
       .linkStrength(0.1);
       // .friction(.8)
       // .linkDistance(200);
@@ -54,9 +71,13 @@ function NetView (svg, network) {
         firm: f,
         r: 5+Math.random()*50,
         x: Math.random()*100, y: Math.random()*100,
-        color: colormap(i / firmsNum)
+        // color: colormap(i / firmsNum)
       };
       return f.view[vid];
+    });
+
+    _(nodes).each(function(f, i) {
+      f.color = colormap(i / firmsNum);
     });
 
     links = _(links).map(function(l) {
@@ -69,11 +90,11 @@ function NetView (svg, network) {
     return d.firm.id();
   }
 
-  function updateView () {
+  function refreshView () {
 
     graph = prepareGraph();
 
-    var totEmpl = network.numOfAffiliates();
+    var avgEmpl = network.numOfAffiliates() / graph.nodes.length;
 
     link = link.data(graph.links);
     link.exit().remove();
@@ -87,18 +108,21 @@ function NetView (svg, network) {
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
         .on("click", function(d) {
-          console.info(d.firm);
+          console.info(d.firm.id(), d.firm);
         })
         .style("stroke", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
         .style("fill", function(d) {return d.color;})
-        .call(force.drag);
+        .call(force.drag().on("dragstart", function() {d3.event.sourceEvent.stopPropagation();}));
 
     firmNode.attr("r", function(d){
-      return percSize(1, 100, d.firm.numOfAffiliates(), totEmpl);
+      return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), avgEmpl);
     });
-    firmNode.style("stroke-width", function(d) {
-      return percSize(1, 100, d.firm.numOfEmployees().unemployed, totEmpl);
-    })
+    firmNode
+      .style("stroke", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
+      .style("fill", function(d) {return d.color;})
+      .style("stroke-width", function(d) {
+        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().unemployed, avgEmpl);
+      });
 
     firmNode.append("title")
         .text(function(d) { return d.firm.id(); });
@@ -123,6 +147,19 @@ function NetView (svg, network) {
 
   }
 
+  var smooth;
+  function updateView () {
+    var avgEmpl = network.numOfAffiliates() / graph.nodes.length;
+    var nodes = smooth ? firmNode.transition().duration(conf.animationDuration) : firmNode;
+    nodes
+      .attr("r", function(d){
+        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), avgEmpl);
+      })
+      .style("stroke-width", function(d) {
+        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().unemployed, avgEmpl);
+      });
+  }
+
   force.on("tick", function() {
     link.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
@@ -136,21 +173,47 @@ function NetView (svg, network) {
   });
 
 
-  this.layout = force;
+  // this.layout = force;
 
   this.model = function() { return network; };
+
+  // THIS IS TEMPORARY, JUST FOR DEMO --- will be refactored into a controller component
+  var timer;
+  this.start = function(interval) {
+    if ( arguments.length === 0 ) interval = 300;
+    smooth = (interval >= (conf.animationDuration + 75));
+    if ( timer ) this.stop();
+    timer = setInterval(this.step, interval);
+  };
+
+  this.stop = function() {
+    clearInterval(timer);
+    timer = undefined;
+  };
+
+  this.running = function() {return (timer !== undefined);};
+
+  this.step = function(num) {
+    network.step(num);
+  };
+
+  this.layout = function() {
+    force.start();
+  };
 
   this.destroy = function() {
     _(network.firms()).each(function(f) {
       delete f.view[vid];
     });
-    network.off("networkChange", updateView);
+    network.off("networkChange", refreshView);
+    network.off("simulationStep", updateView);
     svg.remove();
   };
 
-  updateView();
+  refreshView();
 
-  network.on("networkChange", updateView);
+  network.on("networkChange", refreshView);
+  network.on("simulationStep", updateView);
 }
 
 
