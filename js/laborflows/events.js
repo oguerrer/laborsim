@@ -50,9 +50,10 @@ define(["underscore"], function(_){
       }
 
       function stillOn ( type ) {
-        if( arguments.length === 0 || type === undefined ){
+        if( arguments.length === 0 || type === undefined || _(type).isArray() ){
           var len = 0;
-          for(var l in listeners)
+          var keys = type || _(listeners).keys();
+          for(var l in keys)
             len += listeners[l].length;
           return len;
         }
@@ -62,21 +63,24 @@ define(["underscore"], function(_){
       /**
        * subscribe a listener of an event type
        *
-       * @param  {string}           type     The type of event
+       * @param  {string|[string]}  type     The type of event
        * @param  {?events~Listener} callback The callback
        * @return {(number|events~Listener)}  If `callback` is specified, returns it, otherwise returns the number of listeners registered for `type`.
        *
        * @throws Error when `type` is not among the defined event types
        */
-      function subscribe ( type, callback ) {
+      function subscribe ( ts, callback ) {
 
         // subscribe() / subscribe(type) -> num of listeners on type
-        if( arguments.length < 2 ){
-          return stillOn();
+        if ( arguments.length < 2 ){
+          return stillOn(ts);
         }
+        if ( !(_(ts).isArray()) ) ts = [ts];
 
         // subscribe(type, callback) -> insert callback and return listener
-        getQueue(type).unshift(callback);
+        _(ts).each(function(type) {
+          getQueue(type).unshift(callback);
+        });
         return callback;
 
       }
@@ -117,7 +121,7 @@ define(["underscore"], function(_){
         return queue.length;
       }
 
-      function unsubscribe ( type, listener ) {
+      function unsubscribe ( ts, listener ) {
 
         if ( arguments.length < 1 ){
           for ( var t in listeners ) {
@@ -126,19 +130,22 @@ define(["underscore"], function(_){
           return this;
         }
 
-        var queue = getQueue(type);
-        if ( arguments.length == 1 ){
-          queue = [];
-          return this;
-        } else {
-          for ( var i in queue ) {
-            if ( queue[i] === listener ) {
-              queue.splice( i, 1 );
-              return this;
+        if ( !(_(ts).isArray()) ) ts = [ts];
+
+        _(ts).each(function(el) {
+          var queue = getQueue(type);
+          if ( arguments.length == 1 ){
+            queue = [];
+          } else {
+            for ( var i in queue ) {
+              if ( queue[i] === listener ) {
+                queue.splice( i, 1 );
+                return;
+              }
             }
           }
-          return this;
-        }
+        });
+        return this;
 
       }
 
