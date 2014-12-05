@@ -59,6 +59,8 @@ This project makes use of the following libraries
      – manipulation of the DOM
  * [`random.js`](https://github.com/ckknight/random-js)
      – mathematically correct random number generator
+ * [`chroma.js`](https://github.com/gka/chroma.js)
+     – color manipulations
  * [`d3.js`](http://d3js.org/)
      – visualisation library
  * [Semantic UI](http://semantic-ui.com/)
@@ -69,6 +71,8 @@ This project makes use of the following libraries
 
 Indentation: 2 spaces, no tabs. Lines max 80 chars long. Use `"` and not `'`.
 See https://github.com/rwaldron/idiomatic.js for reference.
+
+Where possible, use underscore's object oriented style, e.g. `_(a).map(...)` instead of `_map(a, ...)`.
 
 All JavaScript code should pass [JSHint](http://www.jshint.com/docs/)'s check.
 
