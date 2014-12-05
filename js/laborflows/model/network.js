@@ -225,13 +225,16 @@ function Network(networkSpec){
     var frms = {};
     var diff = [];
 
-    if ( arguments.length == 2) {
+    if ( arguments.length == 2 ) {
       frms[id] = spec;
-    } else if ( arguments.length == 1){
+    } else if ( arguments.length == 1 ){
       if(_(id).isArray()){
         for( var i in id ){
           frms[id[i]] = {};
         }
+      } else if( _(id).isString() ) {
+        frms = {};
+        frms[id] = {};
       } else {
         frms = id;
       }
@@ -240,7 +243,6 @@ function Network(networkSpec){
     }
 
     for( var f in frms ){
-
       if( _unknownFirm(f) ){
         var firm = _createFirm(f, frms[f]);
         diff.push(firm);
