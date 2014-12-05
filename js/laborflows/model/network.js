@@ -9,8 +9,11 @@
 
 define([
   "underscore",
+  "random",
   "laborflows/events"
-], function(_, events){
+], function(_, Random, events){
+
+var rand = new Random(Random.engines.mt19937().autoSeed());
 
 /**
  * A firm is identified by a string id
@@ -42,6 +45,8 @@ function Network(networkSpec){
   var firms = {};
   var workforce = {};
   var workerMarker = 0;
+
+  var timesteps = 0;
 
   var net = this;
 
@@ -405,6 +410,55 @@ function Network(networkSpec){
     return false;
   };
 
+  var _firmIsHiring = function(n) {return firms[n].state.isHiring;};
+
+  this.step = function(num) {
+    //* @todo keep a diff for the events
+
+    num = num || 1;
+
+    for ( var i=0; i < num; i++ ) {
+      // update isHiring
+      for ( var f in firms ) {
+        var firm = firms[f];
+        firm.state.isHiring = rand.bool(firm.param.isHiringProb);
+      }
+
+      for ( var w in workforce ) {
+        var worker = workforce[w];
+        if ( worker.state.employed ) {
+          // Gets fired with prob fireProb
+          if ( rand.bool( worker.firm.param.fireProb ) ) worker.state.employed = false;
+        } else {
+          // Searches for a new job with prob searchingProb
+          if ( rand.bool( worker.param.searchingProb ) ){
+            var hiringNeighbors = _( worker.firm.neighbors ).keys()
+                  .filter(_firmIsHiring);
+            if ( _(hiringNeighbors).size() > 0 ) {
+              var newFirm = firms[ rand.pick( hiringNeighbors ) ];
+              if ( rand.bool( newFirm.param.hireProb ) ) {
+                _employWorkerAt(worker, newFirm);
+              }
+            }
+          }
+        }
+      }
+      timesteps++;
+    }
+
+    //* @todo trigger workers/firms changed event
+    this.trigger("simulationStep");
+    return this;
+  };
+
+  function _employWorkerAt (worker, newFirm) {
+    delete worker.firm.workers[worker.id];
+    newFirm.workers[worker.id] = worker;
+    worker.firm = newFirm;
+    worker.state.employed = true;
+  }
+
+  this.time = function() {return timesteps;};
 
   // @todo init code following firmsSpec
 
