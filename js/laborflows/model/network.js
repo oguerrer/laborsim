@@ -67,6 +67,7 @@ function Network(networkSpec){
   FirmHandle.prototype.state     = function(s, v) {return _firmState.call(this, this.id(), s, v);};
   FirmHandle.prototype.numOfEmployees = function() {return _numOfEmployees(this.id());};
   FirmHandle.prototype.numOfAffiliates = function() {return _numOfAffiliates(this.id());};
+
   function _invalidateHandle(cls, h) {
     var err = function() {throw Error("This element has been removed!");};
     for( var p in cls.prototype ){
@@ -146,15 +147,21 @@ function Network(networkSpec){
     _(firms[id].param).extend(_(spec).pick("isHiringProb", "hireProb", "fireProb"));
     // these probabilities can be generalised to functions from workers to bool
 
-    var w = spec.workers || 0;
+    if ( _(firms[id].workers).size() > 0 )
+      _removeWorkers(id);
+    _addWorkers(id, spec.workers);
+  }
+
+  function _addWorkers (id, wspec) {
+    var w = wspec || 0;
     if(_(w).isNumber())
-      w = [{num: w, spec: {}}];
+      w = [{num: w}];
     else if(!(_(w).isArray()))
       w = [w];
     for(var i in w){
       for(var j = 0; j < w[i].num; j++){
-        w[i].spec = _(w[i].spec).defaults(net.defaultWorkerSpec);
-        _createWorker(id, w[i].spec);
+        w[i] = _(w[i]).defaults(net.defaultWorkerSpec);
+        _createWorker(id, w[i]);
       }
     }
   }
@@ -217,6 +224,7 @@ function Network(networkSpec){
     if ( arguments.length == 2 ) {
       _updateFirmFromSpec(id, spec);
       firm.trigger("changed", {newspec: true});
+      this.trigger("network-change", {firmsChanged: [firm]});
     }
     return firm;
   };
@@ -314,6 +322,7 @@ function Network(networkSpec){
     if( arguments.length === 3 ){
       f1 = _lookupFirm(f1);
       if( !(_(f2).isArray()) ) f2 = [f2];
+      var diffAdd = [], diffDel = [];
       for( var i in f2 ){
         fi = _lookupFirm(f2[i]);
         if(f1.id() == fi.id()) continue;
@@ -321,16 +330,18 @@ function Network(networkSpec){
           var lbl = _(label).clone();
           firms[f1].neighbors[fi] = lbl;
           firms[fi].neighbors[f1] = lbl;
+          diffAdd.push({source: f1, target: fi, label: label});
         } else {
           delete firms[f1].neighbors[fi];
           delete firms[fi].neighbors[f1];
+          diffDel.push({source: f1, target: fi});
         }
       }
-      this.trigger("link-change", {source: f1, target: f2, label: _(label).clone()});
+      this.trigger("network-change", {addedLinks: diffAdd, removedLinks: diffDel});
       return this;
     }
     throw Error("Wrong arguments passed to 'link' method");
-  };
+  }
 
   this.link  = _link;
   this.links = _link;
@@ -348,6 +359,14 @@ function Network(networkSpec){
     if(firm && _lookupFirm(firm))
       return _(firms[firm].workers).pluck("handle");
     return _(workforce).pluck("handle");
+  };
+
+  this.addWorkers = function(id, wspec) {
+    var firm = _lookupFirm(id);
+    var ws = _addWorkers(firm, wspec);
+    firm.trigger("changed", {newspec: true});
+    this.trigger("network-change", {firmsChanged: [firm]});
+    return this;
   };
 
   function _numOfEmployees (firm) {
@@ -374,7 +393,7 @@ function Network(networkSpec){
       _lookupFirm(firm);
       wrks = firms[firm].workers;
     }
-    return wrks.length;
+    return _(wrks).size();
   }
 
   this.numOfEmployees = _numOfEmployees;
@@ -390,7 +409,7 @@ function Network(networkSpec){
   // @todo init code following firmsSpec
 
   // add events handling code
-  events(this, ["network-change","link-change", "firms-add", "firms-remove"]);
+  events(this, ["network-change", "simulation-step"]);
 
 }
 
