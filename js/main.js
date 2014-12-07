@@ -10,8 +10,8 @@ define([
 var rand = new Random(Random.engines.mt19937().autoSeed());
 
 var svg = d3.select("svg#simulation-netview")
-    .attr("width", $(window).width())
-    .attr("height", $(window).height());
+    .attr("width", $("#simulation-view").innerWidth())
+    .attr("height",  $("#simulation-view").innerHeight()-50);
 
 var network = new Network();
 
