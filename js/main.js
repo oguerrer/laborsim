@@ -25,7 +25,6 @@ _(["A", "B", "C", "D", "E"]).each(function(d) {
 });
 
 network.addFirm(firms);
-network.firm("A").param("fireProb", 1);
 network.link("A", ["B", "C", "D"], true);
 network.link("E", ["D", "B"], true);
 
@@ -37,10 +36,15 @@ $("#random-firms").on("click", function() {
   var rfirms = {}, i;
 
   for( i=0; i < 10; i++ ){
-    rfirms["F"+lastRandFirm] = {workers: [
-      {num: rand.integer(10,100), employed: true},
-      {num: rand.integer(10,100), employed: false}
-    ]};
+    rfirms["F"+lastRandFirm] = {
+      hireProb: rand.real(0,1),
+      fireProb: rand.real(0,1),
+      isHiringProb: rand.real(0,1),
+      workers: [
+        {num: rand.integer(10,100), employed: true},
+        {num: rand.integer(10,100), employed: false}
+      ]
+    };
     lastRandFirm++;
   }
   network.addFirm(rfirms);
@@ -56,7 +60,7 @@ $("#toggle-simulation").on("click", function() {
   if(view.running())
     view.stop();
   else
-    view.start();
+    view.start(200);
 });
 
 console.log("LaborFlows rocks");
