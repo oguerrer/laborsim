@@ -77,13 +77,14 @@ function Network(networkSpec){
   function WorkerHandle (firmId, id) {
     this.id = function() {return id;};
     this.firm = function() {return _lookupFirm(firmId);};
-    events(this, ["changed", "removed"]);
+    events(this, ["changed", "removed", "hired", "fired"]);
   }
 
   WorkerHandle.prototype.exists   = function() {return _(workforce).has(this.id());};
   WorkerHandle.prototype.network  = function() {return net;};
   WorkerHandle.prototype.toString = function() {return ""+this.id();};
   WorkerHandle.prototype.valueOf  = function() {return this.id();};
+  WorkerHandle.prototype.prevFirm = function() {return workforce[this.id()].prevFirm.handle;};
 
   WorkerHandle.prototype.param = function(p, v) {
     var w = workforce[this.id()];
@@ -176,6 +177,7 @@ function Network(networkSpec){
     var worker = {
       id: id,
       firm: firms[firmId],
+      prevFirm: firms[firmId],
       handle: handle,
       state: _(spec).pick("employed"),
       param: _(spec).pick("searchingProb")
@@ -413,22 +415,29 @@ function Network(networkSpec){
   var _firmIsHiring = function(n) {return firms[n].state.isHiring;};
 
   this.step = function(num) {
-    //* @todo keep a diff for the events
 
     num = num || 1;
+
+    var diff = {changedFirms: [], hiredWorkers: [], firedWorkers: []};
+    var old;
 
     for ( var i=0; i < num; i++ ) {
       // update isHiring
       for ( var f in firms ) {
         var firm = firms[f];
+        old = firm.state.isHiring;
         firm.state.isHiring = rand.bool(firm.param.isHiringProb);
+        if ( old !== firm.state.isHiring ) diff.changedFirms.push(firm.handle);
       }
 
       for ( var w in workforce ) {
         var worker = workforce[w];
         if ( worker.state.employed ) {
           // Gets fired with prob fireProb
-          if ( rand.bool( worker.firm.param.fireProb ) ) worker.state.employed = false;
+          if ( rand.bool( worker.firm.param.fireProb ) ){
+            worker.state.employed = false;
+            diff.firedWorkers.push(worker.handle);
+          }
         } else {
           // Searches for a new job with prob searchingProb
           if ( rand.bool( worker.param.searchingProb ) ){
@@ -438,6 +447,7 @@ function Network(networkSpec){
               var newFirm = firms[ rand.pick( hiringNeighbors ) ];
               if ( rand.bool( newFirm.param.hireProb ) ) {
                 _employWorkerAt(worker, newFirm);
+                diff.hiredWorkers.push(worker.handle);
               }
             }
           }
@@ -446,14 +456,24 @@ function Network(networkSpec){
       timesteps++;
     }
 
-    //* @todo trigger workers/firms changed event
-    this.trigger("simulationStep");
+    for ( i in diff.changedFirms )
+      diff.changedFirms[i].trigger("changed", {hiringStatus: true});
+
+    for ( i in diff.hiredWorkers )
+      diff.hiredWorkers[i].trigger("hired");
+
+    for ( i in diff.findWorker )
+      diff.findWorker[i].trigger("fired");
+
+
+    this.trigger("simulationStep", diff);
     return this;
   };
 
   function _employWorkerAt (worker, newFirm) {
     delete worker.firm.workers[worker.id];
     newFirm.workers[worker.id] = worker;
+    worker.prevFirm = worker.firm;
     worker.firm = newFirm;
     worker.state.employed = true;
   }
