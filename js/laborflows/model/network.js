@@ -418,7 +418,7 @@ function Network(networkSpec){
 
     num = num || 1;
 
-    var diff = {changedFirms: [], hiredWorkers: [], firedWorkers: []};
+    var diff = {changedFirms: {}, hiredWorkers: {}, firedWorkers: {}};
     var old;
 
     for ( var i=0; i < num; i++ ) {
@@ -427,7 +427,7 @@ function Network(networkSpec){
         var firm = firms[f];
         old = firm.state.isHiring;
         firm.state.isHiring = rand.bool(firm.param.isHiringProb);
-        if ( old !== firm.state.isHiring ) diff.changedFirms.push(firm.handle);
+        if ( old !== firm.state.isHiring ) diff.changedFirms[f] = firm.handle;
       }
 
       for ( var w in workforce ) {
@@ -436,7 +436,7 @@ function Network(networkSpec){
           // Gets fired with prob fireProb
           if ( rand.bool( worker.firm.param.fireProb ) ){
             worker.state.employed = false;
-            diff.firedWorkers.push(worker.handle);
+            diff.firedWorkers[w] = worker.handle;
           }
         } else {
           // Searches for a new job with prob searchingProb
@@ -447,7 +447,7 @@ function Network(networkSpec){
               var newFirm = firms[ rand.pick( hiringNeighbors ) ];
               if ( rand.bool( newFirm.param.hireProb ) ) {
                 _employWorkerAt(worker, newFirm);
-                diff.hiredWorkers.push(worker.handle);
+                diff.hiredWorkers[w] = worker.handle;
               }
             }
           }
