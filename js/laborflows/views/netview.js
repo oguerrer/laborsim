@@ -85,16 +85,25 @@ function NetView (svg, network, config) {
 
   function firmReport(d) {
     var e = d.firm.numOfEmployees();
-    console.info(
-      "Firm "+d.firm.id()+
-      " is "+(d.firm.state("isHiring") ? "" : "not ")+"hiring\n"+
-      "\n\t Employees: "+e.employed+
-      "\n\tUnemployed: "+e.unemployed+
-      "\n\t Neighbors: "+d.firm.neighbors()+
-      "\n\n\t   hiring prob.: "+(d.firm.param("hireProb")*100).toFixed(2)+" %"+
-      "\n\t   firing prob.: "+(d.firm.param("fireProb")*100).toFixed(2)+" %"+
-      "\n\tis hiring prob.: "+(d.firm.param("isHiringProb")*100).toFixed(2)+" %\n"
+    console.groupCollapsed("Firm %s (%s workers)", d.firm.id(), d.firm.numOfAffiliates());
+    console.log(
+      "Firm %s is %s hiring\n"+
+      "\n       Employees: %s"+
+      "\n      Unemployed: %s"+
+      "\n       Neighbors: %s\n"+
+      "\n    hiring prob.: %s %"+
+      "\n    firing prob.: %s %"+
+      "\n is hiring prob.: %s %\n",
+      d.firm.id(),
+      (d.firm.state("isHiring") ? "" : "not "),
+      e.employed,
+      e.unemployed,
+      d.firm.neighbors(),
+      (d.firm.param("hireProb")*100).toFixed(2),
+      (d.firm.param("fireProb")*100).toFixed(2),
+      (d.firm.param("isHiringProb")*100).toFixed(2)
     );
+    console.groupEnd();
   }
 
   function refreshView () {
