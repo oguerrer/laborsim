@@ -15,7 +15,24 @@ function percSize (min, max, size, tot) {
     return min + ( size / tot * ( max - min ) );
   }
 }
-var colormap = chroma.scale(["red", "green", "blue"]);
+
+var colormap = chroma.scale(["red", "green", "blue"]).mode('lab');
+
+//* @todo: find a better home for color index generator
+var colorShift = 1;
+var colorCount = 0;
+var nextColor = function() {
+  var color = (colorShift / 2) + (colorCount * colorShift);
+  if (color < 1){
+    colorCount++;
+  } else {
+    colorShift = colorShift / 2;
+    colorCount = 1;
+    color = colorShift / 2;
+  }
+  return color;
+};
+////////
 
 function NetView (svg, network, config) {
 
@@ -28,7 +45,6 @@ function NetView (svg, network, config) {
 
   var vid = "netview" + (vidMarker++);
   this.id = function() {return vid;};
-  this.c = chroma;
 
   var container = svg;
   var width = container.attr("width"),
@@ -45,118 +61,120 @@ function NetView (svg, network, config) {
       });
   container.call(zoom);
 
+  var link = svg.append("g").selectAll(".link");
+  var firmNode = svg.append("g").selectAll(".firmNode");
+  var firmEmpl = svg.append("g").selectAll(".firmEmpl");
+  var meanSize = 0;
 
   var force = d3.layout.force()
       // .charge(-40*conf.avgFirmSize)
-      .charge(function(d) {return -10*d.firm.numOfAffiliates();})
+      .charge(function(d) {return percSize(-500, -1000, d.firm.numOfAffiliates(), meanSize);})
       .linkStrength(0.1);
       // .friction(.8)
       // .linkDistance(200);
       // .size([width, height]);
 
+  var drag = force.drag()
+      .on("dragstart", function() {d3.event.sourceEvent.stopPropagation();})
+      .on("dragend", function() {force.start();});
 
-  var graph = {};
-  var link = svg.append("g").selectAll(".link");
-  var firmNode = svg.append("g").selectAll(".firmNode");
-  var firmEmpl = svg.append("g").selectAll(".firmEmpl");
-
-
-  function prepareGraph () {
-    var links = network.links(),
-        nodes = network.firms(),
-        firmsNum = nodes.length;
-
-    nodes = _(nodes).map(function(f, i) {
-      f.view[vid] = f.view[vid] || {
-        firm: f,
-        r: 5+Math.random()*50,
-        x: Math.random()*100, y: Math.random()*100,
-        // color: colormap(i / firmsNum)
-      };
-      return f.view[vid];
-    });
-
-    _(nodes).each(function(f, i) {
-      f.color = colormap(i / firmsNum);
-    });
-
-    links = _(links).map(function(l) {
-      return {source: l.source.view[vid], target: l.target.view[vid]};
-    });
-    return {links: links, nodes: nodes};
-  }
 
   function nodekey (d) {
     return d.firm.id();
   }
 
+  function firmReport(d) {
+    var e = d.firm.numOfEmployees();
+    console.info(
+      "Firm "+d.firm.id()+
+      " is "+(d.firm.state("isHiring") ? "" : "not ")+"hiring\n"+
+      "\n\t Employees: "+e.employed+
+      "\n\tUnemployed: "+e.unemployed+
+      "\n\t Neighbors: "+d.firm.neighbors()+
+      "\n\n\t   hiring prob.: "+(d.firm.param("hireProb")*100).toFixed(2)+" %"+
+      "\n\t   firing prob.: "+(d.firm.param("fireProb")*100).toFixed(2)+" %"+
+      "\n\tis hiring prob.: "+(d.firm.param("isHiringProb")*100).toFixed(2)+" %\n"
+    );
+  }
+
   function refreshView () {
 
-    graph = prepareGraph();
+    var links = network.links(),
+        nodes = network.firms(),
+        firmsNum = nodes.length;
 
-    var avgEmpl = network.numOfAffiliates() / graph.nodes.length;
+    meanSize = network.numOfAffiliates() / nodes.length;
 
-    link = link.data(graph.links);
+    nodes = _(nodes).map(function(f, i) {
+      if ( f.view[vid] === undefined ) {
+        f.view[vid] = {
+          firm: f,
+          x: Math.random()*100, y: Math.random()*100,
+          color: colormap(nextColor())
+        };
+      }
+      // f.view[vid].color = colormap(i / firmsNum);
+
+      return f.view[vid];
+    });
+
+    links = _(links).map(function(l) {
+      return {source: l.source.view[vid], target: l.target.view[vid]};
+    });
+
+    link = link.data(links);
     link.exit().remove();
     link.enter().append("line")
         .attr("class", "link");
 
-    firmNode = firmNode.data(graph.nodes, nodekey);
+    firmNode = firmNode.data(nodes, nodekey);
     firmNode.exit().remove();
     firmNode.enter().append("circle")
         .attr("class", "firmNode")
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
-        .on("click", function(d) {
-          console.info(d.firm.id(), d.firm);
-        })
-        .style("stroke", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
-        .style("fill", function(d) {return d.color;})
-        .call(force.drag().on("dragstart", function() {d3.event.sourceEvent.stopPropagation();}));
+        .on("click", firmReport)
+        // .style("stroke", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
+        // .style("fill", function(d) {return d.color;})
+        .style("fill", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
+        .call(drag);
 
     firmNode.attr("r", function(d){
-      return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), avgEmpl);
+      return percSize(conf.minFirmSize, conf.avgFirmSize,  d.firm.numOfAffiliates(), meanSize);
     });
-    firmNode
-      .style("stroke", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
-      .style("fill", function(d) {return d.color;})
-      .style("stroke-width", function(d) {
-        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().unemployed, avgEmpl);
-      });
 
     firmNode.append("title")
         .text(function(d) { return d.firm.id(); });
 
-    // firmEmpl = firmEmpl.data(graph.nodes, nodekey);
-    // firmEmpl.exit().remove();
-    // firmEmpl.enter().append("circle")
-    //     .attr("class", "firmEmpl")
-    //     .attr("cx", function(d){return d.x;})
-    //     .attr("cy", function(d){return d.y;})
-    //     .style("fill", function(d) {return d.color;})
-    //     .call(force.drag);
+    firmEmpl = firmEmpl.data(nodes, nodekey);
+    firmEmpl.exit().remove();
+    firmEmpl.enter().append("circle")
+        .attr("class", "firmEmpl")
+        .attr("cx", function(d){return d.x;})
+        .attr("cy", function(d){return d.y;})
+        .style("fill", function(d) {return d.color;})
+        .on("click", firmReport)
+        .call(drag);
 
-    // firmEmpl.attr("r", function(d){
-    //   return percSize(5, 100, d.firm.numOfEmployees().employed, totEmpl);
-    // });
+    firmEmpl.attr("r", function(d){
+      return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().employed, meanSize);
+    });
 
 
-    force.nodes(graph.nodes)
-         .links(graph.links)
+    force.nodes(nodes)
+         .links(links)
          .start();
 
   }
 
-  var smooth;
   function updateView () {
-    var avgEmpl = network.numOfAffiliates() / graph.nodes.length;
-    var nodes = smooth ? firmNode.transition().duration(conf.animationDuration) : firmNode;
-    nodes
+    firmNode.transition().duration(interval)
       .attr("r", function(d){
-        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), avgEmpl);
-      })
-      .style("stroke-width", function(d) {
-        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().unemployed, avgEmpl);
+        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), meanSize);
+      });
+    firmEmpl.transition().duration(interval)
+      .attr("r", function(d){
+        return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().employed, meanSize);
       });
   }
 
@@ -167,9 +185,9 @@ function NetView (svg, network, config) {
         .attr("y2", function(d) { return d.target.y; });
 
     firmNode.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
-    // firmEmpl.attr("cx", function(d) { return d.x; })
-    //     .attr("cy", function(d) { return d.y; });
+            .attr("cy", function(d) { return d.y; });
+    firmEmpl.attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; });
   });
 
 
@@ -178,10 +196,12 @@ function NetView (svg, network, config) {
   this.model = function() { return network; };
 
   // THIS IS TEMPORARY, JUST FOR DEMO --- will be refactored into a controller component
-  var timer;
-  this.start = function(interval) {
-    if ( arguments.length === 0 ) interval = 300;
-    smooth = (interval >= (conf.animationDuration + 75));
+  var timer, interval;
+  this.start = function(interv) {
+    if ( arguments.length === 0 )
+      interval = 300;
+    else
+      interval = interv;
     if ( timer ) this.stop();
     timer = setInterval(this.step, interval);
   };
@@ -196,6 +216,7 @@ function NetView (svg, network, config) {
   this.step = function(num) {
     network.step(num);
   };
+  /////////////////
 
   this.layout = function() {
     force.start();
