@@ -196,7 +196,7 @@ function NetView (svg, network, config) {
   this.model = function() { return network; };
 
   // THIS IS TEMPORARY, JUST FOR DEMO --- will be refactored into a controller component
-  var timer, interval;
+  var timer, interval = 300;
   this.start = function(interv) {
     if ( arguments.length === 0 )
       interval = 300;
