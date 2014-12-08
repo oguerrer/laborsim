@@ -263,6 +263,14 @@ function Network(networkSpec){
         diff.push(firm);
       }
     }
+
+    // Now that we added all the firms, we can add the links in the specs
+    for( f in frms ){
+      if (_(frms[f].neighbors).isArray()){
+        _addLinks(f, frms[f].neighbors, true, true);
+      }
+    }
+
     if(!(_(diff).isEmpty())) this.trigger("networkChange", {firmsAdded: diff});
     return this;
   };
@@ -327,27 +335,32 @@ function Network(networkSpec){
 
     // link(f1, f2, label) -> net -- setting the link
     if( arguments.length === 3 ){
-      f1 = _lookupFirm(f1);
       if( !(_(f2).isArray()) ) f2 = [f2];
-      var diffAdd = [], diffDel = [];
-      for( var i in f2 ){
-        fi = _lookupFirm(f2[i]);
-        if(f1.id() == fi.id()) continue;
-        if(label){
-          var lbl = _(label).clone();
-          firms[f1].neighbors[fi] = lbl;
-          firms[fi].neighbors[f1] = lbl;
-          diffAdd.push({source: f1, target: fi, label: label});
-        } else {
-          delete firms[f1].neighbors[fi];
-          delete firms[fi].neighbors[f1];
-          diffDel.push({source: f1, target: fi});
-        }
-      }
-      this.trigger("networkChange", {addedLinks: diffAdd, removedLinks: diffDel});
+      var diff = _addLinks(f1, f2, label);
+      this.trigger("networkChange", diff);
       return this;
     }
     throw Error("Wrong arguments passed to 'link' method");
+  }
+
+  function _addLinks (f1, f2, label, avoidDiff) {
+    f1 = _lookupFirm(f1);
+    var diffAdd = [], diffDel = [];
+    for( var i in f2 ){
+      var fi = _lookupFirm(f2[i]);
+      if(f1.id() == fi.id()) continue;
+      if(label){
+        var lbl = _(label).clone();
+        firms[f1].neighbors[fi] = lbl;
+        firms[fi].neighbors[f1] = lbl;
+        if(!avoidDiff) diffAdd.push({source: f1, target: fi, label: label});
+      } else {
+        delete firms[f1].neighbors[fi];
+        delete firms[fi].neighbors[f1];
+        if(!avoidDiff) diffDel.push({source: f1, target: fi});
+      }
+    }
+    return {addedLinks: diffAdd, removedLinks: diffDel};
   }
 
   this.link  = _link;
