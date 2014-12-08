@@ -33,13 +33,16 @@ var view = new NetView(svg, network);
 var lastRandFirm = 0;
 $("#simulation-view").prepend('<button id="random-firms">Insert 10 random firms</button>');
 $("#random-firms").on("click", function() {
-  var rfirms = {}, i;
+  var rfirms = {}, i, N = 10;
+  var all = _(network.firms()).values();
+  for( i=0; i < N; i++ ) all.push("F"+(lastRandFirm+i));
 
-  for( i=0; i < 10; i++ ){
+  for( i=0; i < N; i++ ){
     rfirms["F"+lastRandFirm] = {
       hireProb: rand.real(0,1),
       fireProb: rand.real(0,1),
       isHiringProb: rand.real(0,1),
+      neighbors: rand.sample(all, rand.integer(1, Math.min(3, all.length))),
       workers: [
         {num: rand.integer(10,100), employed: true},
         {num: rand.integer(10,100), employed: false}
@@ -48,11 +51,6 @@ $("#random-firms").on("click", function() {
     lastRandFirm++;
   }
   network.addFirm(rfirms);
-
-  var all = _(network.firms()).values();
-  for( i in rfirms ){
-    network.link(i, rand.sample(all, rand.integer(1, Math.min(3, all.length))), true);
-  }
 });
 
 $("#simulation-view").prepend('<button id="toggle-simulation">Start/stop</button>');
