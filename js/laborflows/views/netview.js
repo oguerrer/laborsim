@@ -56,6 +56,7 @@ function NetView (svg, network, config) {
   var zoom = d3.behavior.zoom()
       .scaleExtent([-10, 10])
       .translate([width/2 , height/2])
+      .on("zoomstart", function() {d3.selectAll(".selected").classed("selected", false);})
       .on("zoom", function() {
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
       });
@@ -68,7 +69,7 @@ function NetView (svg, network, config) {
 
   var force = d3.layout.force()
       // .charge(-40*conf.avgFirmSize)
-      .charge(function(d) {return percSize(-500, -1000, d.firm.numOfAffiliates(), meanSize);})
+      .charge(function(d) {return percSize(-500, -1500, d.firm.numOfAffiliates(), meanSize);})
       .linkStrength(0.1);
       // .friction(.8)
       // .linkDistance(200);
@@ -98,12 +99,17 @@ function NetView (svg, network, config) {
       (d.firm.state("isHiring") ? "" : "not "),
       e.employed,
       e.unemployed,
-      d.firm.neighbors(),
+      d.firm.neighbors().toString(),
       (d.firm.param("hireProb")*100).toFixed(2),
       (d.firm.param("fireProb")*100).toFixed(2),
       (d.firm.param("isHiringProb")*100).toFixed(2)
     );
     console.groupEnd();
+    var $d = d3.select(this);
+    if($d.classed("firmEmpl")){
+      d3.selectAll(".selected").classed("selected", false);
+      $d.classed("selected", true);
+    }
   }
 
   function refreshView () {

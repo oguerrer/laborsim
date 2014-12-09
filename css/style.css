@@ -7,9 +7,9 @@
     top:1em; bottom:1em;
 }
 
-.firmNode.selected {
-  stroke: red;
-  stroke-width: 1.5px;
+.firmEmpl.selected {
+  stroke: #2C74E2;
+  stroke-width: 2px;
 }
 
 .link {
