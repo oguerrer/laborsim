@@ -77,7 +77,7 @@ function Network(networkSpec){
   function WorkerHandle (firmId, id) {
     this.id = function() {return id;};
     this.firm = function() {return _lookupFirm(firmId);};
-    events(this, ["changed", "removed", "hired", "fired"]);
+    events(this, ["changed", "removed"]);
   }
 
   WorkerHandle.prototype.exists   = function() {return _(workforce).has(this.id());};
@@ -199,7 +199,7 @@ function Network(networkSpec){
         return this;
       }
       return firms[id].param[k];
-    }
+    } else throw Error("Unknown firm parameter '"+k+"'");
   }
 
   function _firmState (id, k, v){
@@ -216,7 +216,7 @@ function Network(networkSpec){
         return this;
       }
       return firms[id].state[k];
-    }
+    } else throw Error("Unknown firm state '"+k+"'");
   }
 
   this.knowsFirm = _knownFirm;
@@ -468,16 +468,6 @@ function Network(networkSpec){
       }
       timesteps++;
     }
-
-    for ( i in diff.changedFirms )
-      diff.changedFirms[i].trigger("changed", {hiringStatus: true});
-
-    for ( i in diff.hiredWorkers )
-      diff.hiredWorkers[i].trigger("hired");
-
-    for ( i in diff.findWorker )
-      diff.findWorker[i].trigger("fired");
-
 
     this.trigger("simulationStep", diff);
     return this;
