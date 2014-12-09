@@ -397,11 +397,14 @@ function Network(networkSpec){
       _lookupFirm(firm);
       wrks = firms[firm].workers;
     }
-    var p = _(wrks).partition(function(w) {return w.state.employed === true;});
-    return {
-      employed: _(p[0]).size(),
-      unemployed: _(p[1]).size()
-    };
+    var res = { employed: 0, unemployed: 0 };
+    for ( var w in wrks ) {
+      if ( wrks[w].state.employed )
+        res.employed++;
+      else
+        res.unemployed++;
+    }
+    return res;
   }
 
   // faster then sum of _numOfEmployees
@@ -418,6 +421,7 @@ function Network(networkSpec){
 
   this.numOfEmployees = _numOfEmployees;
   this.numOfAffiliates = _numOfAffiliates;
+  this.numOfFirms = function() { return _(firms).size(); };
 
   this.findWorker = function(w) {
     if( _(workforce).has(w.toString()) )
