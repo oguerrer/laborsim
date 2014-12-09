@@ -132,7 +132,7 @@ define(["underscore"], function(_){
 
         if ( !(_(ts).isArray()) ) ts = [ts];
 
-        _(ts).each(function(el) {
+        _(ts).each(function(type) {
           var queue = getQueue(type);
           if ( arguments.length == 1 ){
             queue = [];
