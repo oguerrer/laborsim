@@ -5,11 +5,22 @@ require.config({
         jquery:     'lib/jquery',
         random:     'lib/random',
         d3:         'lib/d3',
-        chroma:     'lib/chroma'
+        chroma:     'lib/chroma',
+        semanticui: '../semanticui/semantic'
+    },
+    shim: {
+      'semanticui': {
+        deps: ['jquery']
+      }
     }
 });
 
-requirejs(['main']);
-// For testing in the console:
-var app;
-require(["main"], function(m) { app = m; });
+
+var app; // For testing in the console
+
+require(["jquery"], function($) {
+  $(function() {
+    require(["main"], function(m) { app = m; });
+  });
+});
+// requirejs(['semanticui', 'main']);
