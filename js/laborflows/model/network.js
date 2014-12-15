@@ -206,6 +206,8 @@ function Network(networkSpec){
         if ( old != v ) {
           firms[id].param[k] = v;
           firm.trigger("changed", {param: k, from: old, to: v});
+          var diff = {}; diff[firm.id()] = firm;
+          net.trigger("networkChange", {firmsChanged: diff});
         }
         return this;
       }
@@ -225,6 +227,8 @@ function Network(networkSpec){
         if ( old != v ) {
           firms[id].state[k] = v;
           firm.trigger("changed", {state: k, from: old, to: v});
+          var diff = {}; diff[firm.id()] = firm;
+          this.trigger("networkChange", {firmsChanged: diff});
         }
         return this;
       }
@@ -244,7 +248,8 @@ function Network(networkSpec){
     if ( arguments.length == 2 ) {
       _updateFirmFromSpec(id, spec);
       firm.trigger("changed", {newspec: true});
-      this.trigger("networkChange", {firmsChanged: [firm]});
+      var diff = {}; diff[firm.id()] = firm;
+      this.trigger("networkChange", {firmsChanged: diff});
     }
     return firm;
   };
@@ -298,7 +303,8 @@ function Network(networkSpec){
       delete firms[f];
       _invalidateHandle(FirmHandle, firm);
       firm.trigger("removed");
-      this.trigger("networkChange", {firmsRemoved: [f]});
+      var diff = {}; diff[firm.id()] = firm;
+      this.trigger("networkChange", {firmsRemoved: diff});
     } else {
       console.warn("Trying to remove unknown firm '"+f+"'");
     }
