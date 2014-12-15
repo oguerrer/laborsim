@@ -3,8 +3,9 @@ define([
   "jquery",
   "d3",
   "chroma",
-  "laborflows/model/network",
-], function(_, $, d3, chroma, Network) {
+  "laborflows/events",
+  "laborflows/model/network"
+], function(_, $, d3, chroma, events, Network) {
 
 var vidMarker = 0;
 
@@ -46,6 +47,9 @@ function NetView (svg, network, config) {
   var vid = "netview" + (vidMarker++);
   this.id = function() {return vid;};
 
+  var netview = this;
+  events(this, ["firmSelected", "firmUnselected"]);
+
   var container = svg;
   var width = container.attr("width"),
       height = container.attr("height");
@@ -56,9 +60,12 @@ function NetView (svg, network, config) {
   var zoom = d3.behavior.zoom()
       .scaleExtent([-10, 10])
       .translate([width/2 , height/2])
-      .on("zoomstart", function() {d3.selectAll(".selected").classed("selected", false);})
+      // .on("zoomstart", function() {d3.selectAll(".selected").classed("selected", false);})
       .on("zoom", function() {
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+      })
+      .on("zoomend", function() {
+        netview.trigger("firmUnselected");
       });
   container.call(zoom);
 
@@ -76,8 +83,7 @@ function NetView (svg, network, config) {
       // .size([width, height]);
 
   var drag = force.drag()
-      .on("dragstart", function() {d3.event.sourceEvent.stopPropagation();})
-      .on("dragend", function() {force.start();});
+      .on("dragstart", function() {d3.event.sourceEvent.stopPropagation();});
 
 
   function nodekey (d) {
@@ -168,7 +174,9 @@ function NetView (svg, network, config) {
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return d.color;})
-        .on("click", firmReport)
+        .on("click.debug", firmReport)
+        .on("click", function(d) {
+          netview.trigger("firmSelected", {firm: d.firm, firmView: d, rect: this.getBoundingClientRect()});})
         .call(drag);
 
     firmEmpl.attr("r", function(d){
