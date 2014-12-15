@@ -4,14 +4,112 @@
     <meta charset="UTF-8">
     <title>LaborFlows</title>
 
+    <link rel="stylesheet" type="text/css" href="semanticui/semantic.css">
     <link rel="stylesheet" href="css/style.css">
-
-    <script data-main="app" src="js/lib/require.js"></script>
 
 </head>
 <body>
-<div id="simulation-view" class="lf-component lf-main-panel">
-    <svg id="simulation-netview"></svg>
-</div>
+
+    <div id="top-bar" class="ui menu">
+        <a class="header item">
+            <i class="align right small icon"></i><i class="travel icon"></i> Labor<i>flows</i>
+        </a>
+        <a class="item">
+            <i class="download icon"></i> Save
+        </a>
+        <a class="item">
+            <i class="folder open icon"></i> Import
+        </a>
+        <a class="item">
+            <i class="settings icon"></i> Settings
+        </a>
+        <div class="right menu">
+            <a class="item">
+                <i class="help circle icon"></i> Guide
+            </a>
+            <a class="item">
+                <i class="info icon"></i> About
+            </a>
+            <div class="vertically fitted item">
+                <a class="with popup" data-content="View project on GitHub" href="https://github.com/bordaigorl/laborflows">
+                    <i class="alternate github icon"></i>
+                </a>
+                <a class="with popup" data-content="Share on Facebook" href="https://www.facebook.com/sharer/sharer.php?app_id=309437425817038&amp;u=https%3A%2F%2Fgithub.com%2Fbordaigorl%2Flaborflows&amp;display=popup&amp;ref=plugin" target="_new">
+                    <i class="purple facebook icon"></i>
+                </a>
+                <a class="with popup" data-content="Share on Twitter" href="https://twitter.com/share?url=https://github.com/bordaigorl/laborflows" target="_new">
+                    <i class="blue twitter icon"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="simulation">
+        <div id="simulator-controls" class="ui icon buttons">
+            <div id="toggle-simulation" class="ui icon button" title="Run/Pause"><i class="play icon"></i></div>
+            <div id="speed-simulation" class="ui icon bottom left pointing dropdown button" title="Speed">
+                <i class="dashboard icon"></i>
+                <div class="ui menu">
+                    <a id="faster-speed" class="item" title="Faster"><i class="angle double up icon"></i></a>
+                    <a id="slower-speed" class="item" title="Slower"><i class="angle double down icon"></i></a>
+                </div>
+            </div>
+            <div id="layout-simulation" class="ui icon button" title="Redo Layout"><i class="share alternate rotated icon"></i></div>
+            <div id="random-firms" class="ui icon button" title="Insert 10 random firms"><i class="wizard icon"></i></div>
+        </div>
+
+        <svg id="simulation-netview"></svg>
+    </div>
+    <div id="dashboard">
+        <div id="firm-info" class="ui fluid card" style="border-top: 0.3em solid;">
+          <div class="content">
+            <div class="header name">Firm</div>
+            <div class="description">
+                <div class="ui list">
+                    <div class="item">
+                        <span class="right floated description employed">100</span>
+                        <i class="top aligned travel icon"></i>
+                        <div class="content"><span class="header">Employed</span></div>
+                    </div>
+                    <div class="item">
+                        <span class="right floated description unemployed">100</span>
+                        <i class="top aligned group icon"></i>
+                        <div class="content"><span class="header">Unmployed</span></div>
+                    </div>
+                    <div class="item">
+                        <div class="ui right floated small disabled green progress hire-prob">
+                          <div class="bar">
+                            <div class="progress"></div>
+                          </div>
+                        </div>
+                        <i class="top aligned thumbs outline up icon"></i>
+                        <div class="content"><span class="header">Hire prob</span></div>
+                    </div>
+                    <div class="item">
+                        <div class="ui right floated small disabled red progress fire-prob">
+                          <div class="bar">
+                            <div class="progress"></div>
+                          </div>
+                        </div>
+                        <i class="top aligned thumbs outline down icon"></i>
+                        <div class="content"><span class="header">Fire prob</span></div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <div class="extra content">
+              <i class="child link icon"></i>
+              <i class="configure link icon"></i>
+              <i class="lightning link icon"></i>
+              <i class="trash link icon"></i>
+              <i id="shutdown-firm" class="bomb link icon"></i>
+
+              <i class="right floated blue pin link icon"></i>
+          </div>
+        </div>
+    </div>
 </body>
+
+<script data-main="app" src="js/lib/require.js"></script>
+
 </html>

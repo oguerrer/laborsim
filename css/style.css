@@ -1,10 +1,72 @@
-.lf-component {
-    position: absolute; top:0; bottom:0;left: 0; right: 0;
+html {
+    overflow: hidden;
+}
+#simulation {
+    position: absolute;
+    margin: 0;
+    padding:0;
+    bottom: 0px;
+    top: 37px;
+    left: 0px;
+    right: 35%;
+    background: white;
 }
 
-.lf-main-panel {
-    padding:0;
-    top:1em; bottom:1em;
+#simulator-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#speed-simulation > .menu {
+  top: auto;
+  bottom: 100%;
+  left: 0%;
+  right: 0%;
+  margin: 0em 0em 0em;
+  min-width: 0px;
+}
+#speed-simulation > .menu > .item {
+  height: auto;
+  width: auto;
+  text-align: center;
+  color: rgba(60, 60, 60, 0.7);
+  padding-left: .7em !important;
+}
+
+.ui.card .description .field {
+    font-weight: bold;
+}
+
+.ui.progress {
+    padding: 1px !important;
+    margin: 2px !important;
+    margin-left: 3.1em !important;
+    width: 40%;
+}
+.ui.progress .bar {
+    min-width: 1%;
+}
+.ui.progress .bar > .progress {
+    color: black !important;
+    right:auto !important;
+    left:-3.4em !important;
+    text-align: right;
+    width: 3em !important;
+}
+
+#dashboard {
+    position: absolute;
+    margin: 0;
+    width: 35%;
+    right: 0px;
+    top: 37px;
+    bottom: 0px;
+    padding: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-left: 1px solid #CCCCCC;
 }
 
 .firmEmpl.selected {
