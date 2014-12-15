@@ -187,8 +187,11 @@ function Network(networkSpec){
   }
 
   function _firmParam (id, k, v){
-    if ( !id || !k ) throw Error("Not enough arguments to get/set firm parameters");
+    if ( arguments.length < 1 || arguments.length > 3)
+      throw Error("Wrong arguments to get/set firm parameters");
     firm = _lookupFirm(id);
+    if( !k )
+      return _(firms[id].param).clone();
     if ( _(firms[id].param).has(k) ){
       var old = firms[id].param[k];
       if ( v !== undefined ){
@@ -203,9 +206,11 @@ function Network(networkSpec){
   }
 
   function _firmState (id, k, v){
-    if ( arguments.length < 2 || arguments.length > 3)
-      throw Error("Not enough arguments to get/set firm state");
+    if ( arguments.length < 1 || arguments.length > 3)
+      throw Error("Wrong arguments to get/set firm state");
     firm = _lookupFirm(id);
+    if( !k )
+      return _(firms[id].state).clone();
     if ( _(firms[id].state).has(k) ){
       var old = firms[id].state[k];
       if ( v !== undefined ){
