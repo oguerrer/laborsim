@@ -130,7 +130,7 @@ function NetView (svg, network, config) {
       if ( f.view[vid] === undefined ) {
         f.view[vid] = {
           firm: f,
-          x: Math.random()*100, y: Math.random()*100,
+          x: 200-Math.random()*400, y: 200-Math.random()*400,
           color: colormap(nextColor())
         };
       }
