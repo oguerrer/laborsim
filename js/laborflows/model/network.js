@@ -88,7 +88,11 @@ function Network(networkSpec){
 
   WorkerHandle.prototype.param = function(p, v) {
     var w = workforce[this.id()];
-    if(arguments.length === 2 && _(w.param).has(p)){
+    if( arguments.length === 0 ){
+      return _(w.param).clone();
+    }
+    if ( !(_(w.param).has(p)) ) throw Error("Unknown worker parameter '"+p+"'");
+    if(arguments.length === 2){
       if (w.param[s] !== v){
         w.param[p] = v;
         this.trigger("changed");
@@ -99,7 +103,11 @@ function Network(networkSpec){
   };
   WorkerHandle.prototype.state = function(s, v) {
     var w = workforce[this.id()];
-    if(arguments.length === 2 && _(w.state).has(s)){
+    if( arguments.length === 0 ){
+      return _(w.state).clone();
+    }
+    if ( !(_(w.state).has(s)) ) throw Error("Unknown worker state '"+s+"'");
+    if(arguments.length === 2){
       if (w.state[s] !== v){
         w.state[s] = v;
         this.trigger("changed");
