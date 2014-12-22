@@ -5,8 +5,9 @@ define([
   "random",
   "laborflows/model/network",
   "laborflows/views/netview",
+  "laborflows/controllers/simulation",
   "semanticui"
-], function(_, $, d3, Random, Network, NetView) {
+], function(_, $, d3, Random, Network, NetView, Simulation) {
 
 $(window).resize(function() {
   $("svg").height(function() {return $(this).parent().height();})
@@ -18,6 +19,7 @@ var rand = new Random(Random.engines.mt19937().autoSeed());
 
 var network = new Network();
 
+// SETUP SOME DUMMY FIRMS
 var firms = {};
 
 _(["A", "B", "C", "D", "E"]).each(function(d) {
@@ -30,6 +32,8 @@ _(["A", "B", "C", "D", "E"]).each(function(d) {
 network.addFirm(firms);
 network.link("A", ["B", "C", "D"], true);
 network.link("E", ["D", "B"], true);
+////////////////////////////
+
 
 var svg = d3.select("svg#simulation-netview")
     .attr("width", $("#simulation").innerWidth())
@@ -37,16 +41,15 @@ var svg = d3.select("svg#simulation-netview")
 
 var view = new NetView(svg, network);
 
+var sim = new Simulation("#simulator-controls", network);
+
+sim.on("speedChange", function(e) {
+  view.animationDuration = e.delay;
+  $("#speed-val").text(Math.ceil((1 - e.perc) * 100)+"%");
+});
+sim.stepDelay(300);
+
 var lastRandFirm = 0;
-// $("#simulation").prepend('<div id="random-firms" class="ui right labeled icon button"><i class="wizard icon"></i>Insert 10 random firms</div>');
-$(document).ready(function () {
-
-$(window).resize();
-
-$(".with.popup").popup();
-// $("#speed-simulation").popup({on: 'click', inline:true, hoverable:true, position: "top center"});
-$("#speed-simulation").dropdown({action: 'nothing'});
-
 $("#random-firms").on("click", function() {
   var rfirms = {}, i, N = 10;
   var all = _(network.firms()).values();
@@ -68,27 +71,8 @@ $("#random-firms").on("click", function() {
   network.addFirm(rfirms);
 });
 
-var speed = 200;
-// $("#simulation").prepend('<div id="toggle-simulation" class="ui right labeled icon button"><i class="play icon"></i>Run</div>');
-$("#toggle-simulation").on("click", function() {
-  if(view.running()){
-    view.stop();
-  } else {
-    view.start(speed);
-  }
-  $(this).children("i").toggleClass("play pause");
-});
-
 $("#layout-simulation").on("click", function() {
   view.layout();
-});
-$("#slower-speed").on("click", function() {
-  speed+=20;
-  if(view.running()) view.start(speed);
-});
-$("#faster-speed").on("click", function() {
-  speed-=20; if(speed < 0) speed = 0;
-  if(view.running()) view.start(speed);
 });
 
 $("#shutdown-firm").click(function(e){
@@ -100,7 +84,7 @@ $("#shutdown-firm").click(function(e){
 $('#firm-info .ui.progress').progress({
   performance: false, debug: false,
   autoSuccess: false,
-  showActivity : false
+  showActivity: false
 });
 
 $("#firm-info .fire-prob").click(function(e){
@@ -158,10 +142,12 @@ view.on("firmUnselected", function(e){
   // $("#firm-info .hire-prob").addClass('disabled');
 });
 
-// new NetView(d3.select("svg#chart"), network); // just for bunter
+
+$(window).resize();
+
+$(".with.popup").popup();
 
 console.log("LaborFlows rocks");
-});
 
 return {net: network, view: view};
 

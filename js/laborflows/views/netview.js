@@ -44,6 +44,8 @@ function NetView (svg, network, config) {
     animationDuration: 200
   });
 
+  this.animationDuration = conf.animationDuration;
+
   var vid = "netview" + (vidMarker++);
   this.id = function() {return vid;};
 
@@ -191,11 +193,11 @@ function NetView (svg, network, config) {
   }
 
   function updateView () {
-    firmNode.transition().duration(interval)
+    firmNode.transition().duration(netview.animationDuration)
       .attr("r", function(d){
         return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), meanSize);
       });
-    firmEmpl.transition().duration(interval)
+    firmEmpl.transition().duration(netview.animationDuration)
       .attr("r", function(d){
         return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().employed, meanSize);
       });
@@ -217,29 +219,6 @@ function NetView (svg, network, config) {
   // this.layout = force;
 
   this.model = function() { return network; };
-
-  // THIS IS TEMPORARY, JUST FOR DEMO --- will be refactored into a controller component
-  var timer, interval = 300;
-  this.start = function(interv) {
-    if ( arguments.length === 0 )
-      interval = 300;
-    else
-      interval = interv;
-    if ( timer ) this.stop();
-    timer = setInterval(this.step, interval);
-  };
-
-  this.stop = function() {
-    clearInterval(timer);
-    timer = undefined;
-  };
-
-  this.running = function() {return (timer !== undefined);};
-
-  this.step = function(num) {
-    network.step(num);
-  };
-  /////////////////
 
   this.layout = function() {
     force.start();

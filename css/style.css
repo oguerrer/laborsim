@@ -19,7 +19,7 @@ html {
     transform: translateX(-50%);
 }
 
-#speed-simulation > .menu {
+#speed-control > .menu {
   top: auto;
   bottom: 100%;
   left: 0%;
@@ -27,7 +27,7 @@ html {
   margin: 0em 0em 0em;
   min-width: 0px;
 }
-#speed-simulation > .menu > .item {
+#speed-control > .menu > .item {
   height: auto;
   width: auto;
   text-align: center;
