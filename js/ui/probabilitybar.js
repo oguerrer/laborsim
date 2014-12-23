@@ -20,6 +20,8 @@
       if ( p === undefined )
         return this.options.value;
 
+      if ( this._dragging ) return;
+
       this.options.value = p;
       this.options.mixed = false;
       this._update();
@@ -44,8 +46,12 @@
       }
     },
 
+    _dragging: false,
+
     _create: function() {
+
         var settings = this.options;
+        var self = this;
 
         this.element.addClass("ui progress");
         this.element.progress({
@@ -59,11 +65,16 @@
         this._update();
 
         this.element.on("mouseup", function(e) {
+          self._dragging = false;
           var bar = $(this);
           if ( bar.hasClass("disable") ) return;
           var p = e.offsetX / bar.width();
           bar.find(".bar").removeClass("notransition");
           settings.onUserSetValue(p);
+        });
+
+        this.element.on("mousedown", function(e) {
+          self._dragging = true;
         });
 
         this.element.on("mousemove", function(e) {
