@@ -88,6 +88,10 @@ html {
     width: 3em !important;
 }
 
+.ui.probabilitybar.mixed .bar {
+    background-size: 30px 30px;
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.08) 75%, transparent 75%, transparent);
+}
 
 /*******************************
            Dashboard
