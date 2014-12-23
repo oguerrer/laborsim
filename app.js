@@ -11,6 +11,9 @@ require.config({
     shim: {
       'semanticui': {
         deps: ['jquery']
+      },
+      'ui/probabilitybar': {
+        deps: ['jquery', "semanticui"]
       }
     }
 });

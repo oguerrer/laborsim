@@ -65,6 +65,31 @@ html {
 
 
 /*******************************
+        Probability Bar
+*******************************/
+
+.ui.probabilitybar {
+    padding: 1px !important;
+    margin: 2px !important;
+    margin-left: 3.1em !important;
+    width: 40%;
+    cursor: pointer;
+}
+
+.ui.probabilitybar .bar {
+    min-width: 1%;
+}
+
+.ui.probabilitybar .bar > .progress {
+    color: black !important;
+    right:auto !important;
+    left:-3.4em !important;
+    text-align: right;
+    width: 3em !important;
+}
+
+
+/*******************************
            Dashboard
 *******************************/
 
