@@ -64,29 +64,32 @@ $("#layout-simulation").on("click", function() {
   view.layout();
 });
 
-$("#shutdown-firm").click(function(e){
+$("#selected-firm .shutdown-firm").click(function(e){
   if (selectedFirm === null) return;
   selectedFirm.param('fireProb', 1);
   selectedFirm.param('hireProb', 0);
 });
-$("#remove-firm").click(function(e){
+$("#selected-firm .remove-firm").click(function(e){
   if (selectedFirm === null) return;
   network.removeFirm(selectedFirm);
 });
+$("#selected-firm .pin").click(function(e){
+  $('#selected-firm .fire-prob').toggleClass("mixed");
+});
 
-$('#selected-firm .fire-prob').probabilitybar({
-  setValue: function(p) {
+$('#selected-firm .fire-prob').probability({
+  onUserSetValue: function(p) {
     selectedFirm.param("fireProb", p);
   }
 });
-$('#selected-firm .hire-prob').probabilitybar({
-  setValue: function(p) {
+$('#selected-firm .hire-prob').probability({
+  onUserSetValue: function(p) {
     selectedFirm.param("hireProb", p);
   }
 });
 
-$('#network-info .is-hiring-prob').probabilitybar({
-  setValue: function(p) {
+$('#network-info .is-hiring-prob').probability({
+  onUserSetValue: function(p) {
     network.isHiringProb(p);
   }
 });
@@ -98,7 +101,7 @@ network.on("networkChange", function(diff) {
     updateFirmInfo();
   }
   updateNetworkInfo();
-  $("#network-info .is-hiring-prob").probability(network.isHiringProb());
+  $("#network-info .is-hiring-prob").probability("value", network.isHiringProb());
 });
 network.on("simulationStep", function() {
   updateFirmInfo();
@@ -122,7 +125,7 @@ function unsetFirmInfo (e) {
   $("#selected-firm .name").text('---');
   $("#selected-firm .employed").text('---');
   $("#selected-firm .unemployed").text('---');
-  $("#selected-firm .ui.progress").addClass('disabled').probability(0);
+  $("#selected-firm .ui.progress").addClass('disabled').probability("value", 0);
   // $("#selected-firm .hire-prob").addClass('disabled');
 }
 unsetFirmInfo();
@@ -141,10 +144,10 @@ function updateFirmInfo () {
   $("#selected-firm .unemployed").text(w.unemployed);
   $("#selected-firm .fire-prob").removeClass('disabled');
   p = f.param("fireProb");
-  $("#selected-firm .fire-prob").probability(p);
+  $("#selected-firm .fire-prob").probability("value", p);
   $("#selected-firm .hire-prob").removeClass('disabled');
   p = f.param("hireProb");
-  $("#selected-firm .hire-prob").probability(p);
+  $("#selected-firm .hire-prob").probability("value", p);
 }
 
 view.on("firmSelected", function(e){
