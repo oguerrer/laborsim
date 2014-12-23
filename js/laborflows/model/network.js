@@ -46,6 +46,8 @@ function Network(networkSpec){
   var workforce = {};
   var workerMarker = 0;
 
+  var isHiringProb = 0.5;
+
   var timesteps = 0;
 
   var net = this;
@@ -154,10 +156,12 @@ function Network(networkSpec){
   function _updateFirmFromSpec (id, spec) {
     spec = spec || {};
     _(firms[id].state).extend(_(spec).pick("isHiring"));
+
     // if other state information is needed in the future, just add the relevant keys here
     // e.g. _(firmState[id]).extend(_(spec).pick("isHiring", "isBankrupt"));
-    _(firms[id].param).extend(_(spec).pick("isHiringProb", "hireProb", "fireProb"));
+    _(firms[id].param).extend(_(spec).pick("hireProb", "fireProb"));
     // these probabilities can be generalised to functions from workers to bool
+    // Add isHiringProb parameter to enable non uniform open probability
 
     if ( _(firms[id].workers).size() > 0 )
       _removeWorkers(id);
@@ -237,6 +241,15 @@ function Network(networkSpec){
   }
 
   this.knowsFirm = _knownFirm;
+
+  this.isHiringProb = function(p) {
+    if ( arguments.length === 0 ) return isHiringProb;
+    if ( p < 0 ) p = 0;
+    if ( p > 1 ) p = 1;
+    isHiringProb = p;
+    net.trigger("networkChange", {isHiringProb: isHiringProb});
+    return net;
+  };
 
   this.firms = function() {
     return _(firms).pluck("handle");
@@ -462,7 +475,7 @@ function Network(networkSpec){
       for ( var f in firms ) {
         var firm = firms[f];
         old = firm.state.isHiring;
-        firm.state.isHiring = rand.bool(firm.param.isHiringProb);
+        firm.state.isHiring = rand.bool(isHiringProb);
         if ( old !== firm.state.isHiring ) diff.changedFirms[f] = firm.handle;
       }
 
@@ -514,7 +527,7 @@ function Network(networkSpec){
 }
 
 Network.prototype.defaultFirmSpec = {
-  isHiringProb: 0.5, hireProb: 0.5, fireProb: 0.5,
+  hireProb: 0.5, fireProb: 0.5,
   isHiring: true,
 };
 Network.prototype.defaultWorkerSpec = {
