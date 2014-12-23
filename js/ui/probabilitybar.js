@@ -1,59 +1,81 @@
 ;(function ( $ ) {
 
-  $.fn.probabilitybar = function(settings, p) {
-    if ( arguments.length === 0 )
-      return this.progress("percent");
+  $.widget( "laborflows.probability", {
 
-    if ( arguments.length === 1 && typeof settings != "string" ) {
+    options: {
+      value: 0,
+      mixed: undefined,
+      onUserSetValue: function() {}
+    },
 
-      if ( !settings ) settings = {};
-      if ( !settings.value )
-        settings.value = 0;
-      else if (settings.value === 1)
-        settings.value = 100;
-      if ( !settings.setValue ) settings.setValue = function() {};
+    mixed: function(m) {
+      if ( m === undefined )
+        return this.options.mixed;
 
-      this.addClass("ui progress");
-      this.progress({
-        performance: false, debug: false,
-        autoSuccess: false,
-        showActivity: false
-      });
-      this.progress("set percent", settings.value);
+      this.options.mixed = m;
+      this._update();
+    },
 
-      this.on("mouseup", function(e) {
-        var bar = $(this);
-        if ( bar.hasClass("disable") ) return;
-        var p = e.offsetX / bar.width();
-        bar.find(".bar").removeClass("notransition");
-        settings.setValue(p);
-      });
+    value: function(p) {
+      if ( p === undefined )
+        return this.options.value;
 
-      this.on("mousemove", function(e) {
-        var bar = $(this);
-        if ( e.which === 1 && !(bar.hasClass("disable")) ) {
-          var p = Math.ceil(e.offsetX / bar.width() * 100) + "%";
-          bar.find(".bar").addClass("notransition").css("width", p);
-          bar.find(".progress").text(p);
-        }
-      });
+      this.options.value = p;
+      this.options.mixed = false;
+      this._update();
+    },
 
-    } else {
-      if ( settings === "set percent" )
-        this.progress("set percent", p<1?p:100);
-      else
-        this.progress.apply(this, arguments);
-    }
-  };
+    // _setOption: function( key, value ) {
+    //   this.options[ key ] = value;
+    //   this._update();
+    // },
 
-  $.fn.probability = function(p) {
-    if ( arguments.length === 0 ) {
-      var perc = this.progress("percent");
-      if ( perc > 1 ) perc = perc / 100;
-      return perc;
-    }
-    this.progress("set percent", p<1?p:100);
-  };
+    _update: function() {
+      var p = this.options.value;
+      if ( p > 1 ) p = 1;
+      else if ( p < 0 ) p = 0;
+      if ( this.options.mixed ) {
+        this.element.addClass("mixed");
+        this.element.progress("set percent", 100);
+        this.element.find(".bar .progress").text("mixed");
+      } else {
+        this.element.removeClass("mixed");
+        this.element.progress("set percent", p<1?p:100);
+      }
+    },
+
+    _create: function() {
+        var settings = this.options;
+
+        this.element.addClass("ui progress");
+        this.element.progress({
+          performance: false, debug: false,
+          autoSuccess: false,
+          showActivity: false
+        });
+
+        if (this.options.mixed === undefined )
+          this.options.mixed = this.element.hasClass("mixed");
+        this._update();
+
+        this.element.on("mouseup", function(e) {
+          var bar = $(this);
+          if ( bar.hasClass("disable") ) return;
+          var p = e.offsetX / bar.width();
+          bar.find(".bar").removeClass("notransition");
+          settings.onUserSetValue(p);
+        });
+
+        this.element.on("mousemove", function(e) {
+          var bar = $(this);
+          if ( e.which === 1 && !(bar.hasClass("disable")) ) {
+            var p = Math.ceil(e.offsetX / bar.width() * 100) + "%";
+            bar.find(".bar").addClass("notransition").css("width", p);
+            bar.find(".progress").text(p);
+          }
+        });
+      }
+  });
 
 }( jQuery ));
 

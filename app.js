@@ -13,7 +13,7 @@ require.config({
         deps: ['jquery']
       },
       'ui/probabilitybar': {
-        deps: ['jquery', "semanticui"]
+        deps: ['jquery', 'lib/jquery-widget', 'semanticui']
       }
     }
 });
