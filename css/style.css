@@ -121,3 +121,10 @@ html {
   margin-left: .5em;
   margin-right: .5em;
 }
+
+.ui.card.black {
+  border-top: 2px solid black;
+}
+.ui.card.blue {
+  border-top: 2px solid #3b83c0;
+}
