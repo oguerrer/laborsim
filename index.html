@@ -62,51 +62,87 @@
         <svg id="simulation-netview"></svg>
     </div>
     <div id="dashboard">
-        <div id="firm-info" class="ui fluid card" style="border-top: 0.3em solid;">
-          <div class="content">
-            <div class="header name">Firm</div>
-            <div class="description">
-                <div class="ui list">
-                    <div class="item">
-                        <span class="right floated description employed">100</span>
-                        <i class="top aligned travel icon"></i>
-                        <div class="content"><span class="header">Employed</span></div>
-                    </div>
-                    <div class="item">
-                        <span class="right floated description unemployed">100</span>
-                        <i class="top aligned group icon"></i>
-                        <div class="content"><span class="header">Unmployed</span></div>
-                    </div>
-                    <div class="item">
-                        <div class="ui right floated small disabled green progress hire-prob">
-                          <div class="bar">
-                            <div class="progress"></div>
-                          </div>
+        <div id="firms-stats" class="ui two cards">
+            <div id="network-info" class="ui card" style="border-top: 0.3em solid black;">
+              <div class="content">
+                <div class="header name">Network</div>
+                <div class="description">
+                    <div class="ui list">
+                        <div class="item" style="margin-bottom: .7em">
+                            <div class="totals content">---</div>
                         </div>
-                        <i class="top aligned thumbs outline up icon"></i>
-                        <div class="content"><span class="header">Hire prob</span></div>
-                    </div>
-                    <div class="item">
-                        <div class="ui right floated small disabled red progress fire-prob">
-                          <div class="bar">
-                            <div class="progress"></div>
-                          </div>
+                        <div class="item">
+                            <span class="right floated description employed">---</span>
+                            <i class="top aligned travel icon"></i>
+                            <div class="content"><span class="header">Employed</span></div>
                         </div>
-                        <i class="top aligned thumbs outline down icon"></i>
-                        <div class="content"><span class="header">Fire prob</span></div>
+                        <div class="item">
+                            <span class="right floated description unemployed">---</span>
+                            <i class="top aligned group icon"></i>
+                            <div class="content"><span class="header">Unemployed</span></div>
+                        </div>
+                        <div class="item">
+                            <i style="float:left" class="top aligned announcement icon"></i>
+                            <div style="float:left" class="content"><span class="header">Open</span></div>
+                            <div class="ui right floated small blue probabilitybar is-hiring-prob">
+                              <div class="bar">
+                                <div class="progress"></div>
+                              </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+              </div>
+            <div class="ui bottom attached button">
+              <i class="add icon"></i>
+              Add Firm
             </div>
-          </div>
-          <div class="extra content">
-              <i class="child link icon"></i>
-              <i class="configure link icon"></i>
-              <i class="lightning link icon"></i>
-              <i class="trash link icon"></i>
-              <i id="shutdown-firm" class="bomb link icon"></i>
+            </div>
+            <div id="selected-firm" class="ui card" style="border-top: 0.3em solid;">
+              <div class="content">
+                <div class="header name">Firm</div>
+                <div class="description">
+                    <div class="ui list">
+                        <div class="item">
+                            <span class="right floated description employed">100</span>
+                            <i class="top aligned travel icon"></i>
+                            <div class="content"><span class="header">Employed</span></div>
+                        </div>
+                        <div class="item">
+                            <span class="right floated description unemployed">100</span>
+                            <i class="top aligned group icon"></i>
+                            <div class="content"><span class="header">Unemployed</span></div>
+                        </div>
+                        <div class="item">
+                            <i style="float:left" class="top aligned thumbs outline up icon"></i>
+                            <div style="float:left" class="content"><span class="header">Hiring</span></div>
+                            <div class="ui right floated small disabled green probabilitybar hire-prob">
+                              <div class="bar">
+                                <div class="progress"></div>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <i style="float:left" class="top aligned thumbs outline down icon"></i>
+                            <div style="float:left" class="content"><span class="header">Firing</span></div>
+                            <div class="ui right floated small disabled red probabilitybar fire-prob">
+                              <div class="bar">
+                                <div class="progress"></div>
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <div class="extra content">
+                  <i class="child link icon"></i>
+                  <i class="wizard link icon"></i>
+                  <i id="shutdown-firm" class="bomb link icon"></i>
+                  <i id="remove-firm"   class="trash link icon"></i>
 
-              <i class="right floated blue pin link icon"></i>
-          </div>
+                  <i class="right floated blue pin link icon"></i>
+              </div>
+            </div>
         </div>
     </div>
 </body>

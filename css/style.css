@@ -1,6 +1,19 @@
 html {
     overflow: hidden;
 }
+
+.notransition {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
+
+/*******************************
+       NetView Component
+*******************************/
+
 #simulation {
     position: absolute;
     margin: 0;
@@ -8,9 +21,24 @@ html {
     bottom: 0px;
     top: 37px;
     left: 0px;
-    right: 35%;
+    right: 45%;
     background: white;
 }
+
+
+.firmEmpl.selected {
+  stroke: #2C74E2;
+  stroke-width: 2px;
+}
+
+.link {
+  stroke: #999;
+  stroke-width: 1.5px;
+}
+
+/*------------------------------
+  Simulation playback controls
+------------------------------*/
 
 #simulator-controls {
     position: absolute;
@@ -35,31 +63,15 @@ html {
   padding-left: .7em !important;
 }
 
-.ui.card .description .field {
-    font-weight: bold;
-}
 
-.ui.progress {
-    padding: 1px !important;
-    margin: 2px !important;
-    margin-left: 3.1em !important;
-    width: 40%;
-}
-.ui.progress .bar {
-    min-width: 1%;
-}
-.ui.progress .bar > .progress {
-    color: black !important;
-    right:auto !important;
-    left:-3.4em !important;
-    text-align: right;
-    width: 3em !important;
-}
+/*******************************
+           Dashboard
+*******************************/
 
 #dashboard {
     position: absolute;
     margin: 0;
-    width: 35%;
+    width: 45%;
     right: 0px;
     top: 37px;
     bottom: 0px;
@@ -69,13 +81,18 @@ html {
     border-left: 1px solid #CCCCCC;
 }
 
-.firmEmpl.selected {
-  stroke: #2C74E2;
-  stroke-width: 2px;
+#dashboard .ui.card .description .field {
+    font-weight: bold;
 }
 
-.link {
-  stroke: #999;
-  stroke-width: 1.5px;
+#dashboard .ui.two.cards {
+  margin-left: -.5em;
+  margin-right: -.5em;
 }
-
+#dashboard .ui.two.cards > .card {
+  width: -webkit-calc( 50%  -  1em );
+  width: calc( 50%  -  1em );
+  margin-bottom: .7em;
+  margin-left: .5em;
+  margin-right: .5em;
+}
