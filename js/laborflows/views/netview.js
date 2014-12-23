@@ -92,34 +92,6 @@ function NetView (svg, network, config) {
     return d.firm.id();
   }
 
-  function firmReport(d) {
-    var e = d.firm.numOfEmployees();
-    console.groupCollapsed("Firm %s (%s workers)", d.firm.id(), d.firm.numOfAffiliates());
-    console.log(
-      "Firm %s is %s hiring\n"+
-      "\n       Employees: %s"+
-      "\n      Unemployed: %s"+
-      "\n       Neighbors: %s\n"+
-      "\n    hiring prob.: %s %"+
-      "\n    firing prob.: %s %"+
-      "\n is hiring prob.: %s %\n",
-      d.firm.id(),
-      (d.firm.state("isHiring") ? "" : "not "),
-      e.employed,
-      e.unemployed,
-      d.firm.neighbors().toString(),
-      (d.firm.param("hireProb")*100).toFixed(2),
-      (d.firm.param("fireProb")*100).toFixed(2),
-      (d.firm.param("isHiringProb")*100).toFixed(2)
-    );
-    console.groupEnd();
-    var $d = d3.select(this);
-    if($d.classed("firmEmpl")){
-      d3.selectAll(".selected").classed("selected", false);
-      $d.classed("selected", true);
-    }
-  }
-
   function refreshView () {
 
     var links = network.links(),
@@ -156,9 +128,6 @@ function NetView (svg, network, config) {
         .attr("class", "firmNode")
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
-        .on("click", firmReport)
-        // .style("stroke", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
-        // .style("fill", function(d) {return d.color;})
         .style("fill", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
         .call(drag);
 
@@ -176,9 +145,13 @@ function NetView (svg, network, config) {
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return d.color;})
-        .on("click.debug", firmReport)
         .on("click", function(d) {
-          netview.trigger("firmSelected", {firm: d.firm, firmView: d, rect: this.getBoundingClientRect()});})
+          netview.trigger("firmSelected", {
+            firm: d.firm,
+            firmView: d,
+            rect: this.getBoundingClientRect()
+          });
+        })
         .call(drag);
 
     firmEmpl.attr("r", function(d){
