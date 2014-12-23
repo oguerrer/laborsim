@@ -6,7 +6,8 @@ define([
   "laborflows/model/network",
   "laborflows/views/netview",
   "laborflows/controllers/simulation",
-  "semanticui"
+  "semanticui",
+  "ui/probabilitybar"
 ], function(_, $, d3, Random, Network, NetView, Simulation) {
 
 $(window).resize(function() {
@@ -68,24 +69,26 @@ $("#shutdown-firm").click(function(e){
   selectedFirm.param('fireProb', 1);
   selectedFirm.param('hireProb', 0);
 });
-
-$('#firm-info .ui.progress').progress({
-  performance: false, debug: false,
-  autoSuccess: false,
-  showActivity: false
+$("#remove-firm").click(function(e){
+  if (selectedFirm === null) return;
+  network.removeFirm(selectedFirm);
 });
 
-$("#firm-info .fire-prob").click(function(e){
-  if (selectedFirm === null) return;
-  var bar = $(this);
-  var p = e.offsetX / bar.width();
-  selectedFirm.param("fireProb", p);
+$('#selected-firm .fire-prob').probabilitybar({
+  setValue: function(p) {
+    selectedFirm.param("fireProb", p);
+  }
 });
-$("#firm-info .hire-prob").click(function(e){
-  if (selectedFirm === null) return;
-  var bar = $(this);
-  var p = e.offsetX / bar.width();
-  selectedFirm.param("hireProb", p);
+$('#selected-firm .hire-prob').probabilitybar({
+  setValue: function(p) {
+    selectedFirm.param("hireProb", p);
+  }
+});
+
+$('#network-info .is-hiring-prob').probabilitybar({
+  setValue: function(p) {
+    network.isHiringProb(p);
+  }
 });
 
 var selectedFirm = null;
@@ -94,41 +97,62 @@ network.on("networkChange", function(diff) {
   if (selectedFirm !== null && _(diff.firmsChanged).has(selectedFirm.id())) {
     updateFirmInfo();
   }
+  updateNetworkInfo();
+  $("#network-info .is-hiring-prob").probability(network.isHiringProb());
 });
 network.on("simulationStep", function() {
   updateFirmInfo();
+  updateNetworkInfo();
 });
+
+function updateNetworkInfo () {
+  var w = network.numOfEmployees();
+  var tot = network.numOfAffiliates();
+  $("#network-info .totals").text(network.numOfFirms() + " firms, " + tot + " workers");
+  $("#network-info .employed").text(w.employed + " (" + Math.round(w.employed/tot * 100) + "%)");
+  $("#network-info .unemployed").text(w.unemployed + " (" + Math.round(w.unemployed/tot * 100) + "%)");
+}
+updateNetworkInfo();
+$("#network-info .ui.progress").progress('set percent', network.isHiringProb());
+
+function unsetFirmInfo (e) {
+  selectedFirm = null;
+  $("#selected-firm").css("border-color", "black");
+  $("#selected-firm .name").text('---');
+  $("#selected-firm .name").text('---');
+  $("#selected-firm .employed").text('---');
+  $("#selected-firm .unemployed").text('---');
+  $("#selected-firm .ui.progress").addClass('disabled').probability(0);
+  // $("#selected-firm .hire-prob").addClass('disabled');
+}
+unsetFirmInfo();
 
 function updateFirmInfo () {
   var f = selectedFirm, p;
   if (f === null) return;
+  if (!f.exists()) {
+    selectedFirm = null;
+    unsetFirmInfo();
+    return;
+  }
   var w = f.numOfEmployees();
-  $("#firm-info .name").text("Firm "+f.id());
-  $("#firm-info .employed").text(w.employed);
-  $("#firm-info .unemployed").text(w.unemployed);
-  $("#firm-info .fire-prob").removeClass('disabled');
+  $("#selected-firm .name").text("Firm "+f.id());
+  $("#selected-firm .employed").text(w.employed);
+  $("#selected-firm .unemployed").text(w.unemployed);
+  $("#selected-firm .fire-prob").removeClass('disabled');
   p = f.param("fireProb");
-  $("#firm-info .fire-prob").progress('set percent',(p<1?p:100));
-  $("#firm-info .hire-prob").removeClass('disabled');
+  $("#selected-firm .fire-prob").probability(p);
+  $("#selected-firm .hire-prob").removeClass('disabled');
   p = f.param("hireProb");
-  $("#firm-info .hire-prob").progress('set percent',(p<1?p:100));
+  $("#selected-firm .hire-prob").probability(p);
 }
 
 view.on("firmSelected", function(e){
   selectedFirm = e.firm;
-  $("#firm-info").css("border-color", e.firmView.color);
+  $("#selected-firm").css("border-color", e.firmView.color);
   updateFirmInfo();
 });
-view.on("firmUnselected", function(e){
-  selectedFirm = null;
-  $("#firm-info").css("border-color", "black");
-  $("#firm-info .name").text('---');
-  $("#firm-info .name").text('---');
-  $("#firm-info .employed").text('---');
-  $("#firm-info .unemployed").text('---');
-  $("#firm-info .ui.progress").addClass('disabled').progress('set percent',0);
-  // $("#firm-info .hire-prob").addClass('disabled');
-});
+view.on("firmUnselected", unsetFirmInfo);
 
 
 $(window).resize();
