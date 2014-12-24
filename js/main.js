@@ -6,10 +6,11 @@ define([
   "laborflows/model/network",
   "laborflows/views/netview",
   "laborflows/views/firmview",
+  "laborflows/views/netinfo",
   "laborflows/controllers/simulation",
   "semanticui",
   "ui/probabilitybar"
-], function(_, $, d3, Random, Network, NetView, FirmView, Simulation) {
+], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation) {
 
 $(window).resize(function() {
   $("svg").height(function() {return $(this).parent().height();})
@@ -65,28 +66,8 @@ $("#layout-simulation").on("click", function() {
   netview.layout();
 });
 
-$('#network-info .is-hiring-prob').probability({
-  onUserSetValue: function(p) {
-    network.isHiringProb(p);
-  }
-});
-
-network.on("networkChange", updateNetworkInfo);
-network.on("simulationStep", updateNetworkInfo);
-
-
-function updateNetworkInfo (e) {
-  var w = network.numOfEmployees();
-  var tot = network.numOfAffiliates();
-  $("#network-info .totals").text(network.numOfFirms() + " firms, " + tot + " workers");
-  $("#network-info .employed").text(w.employed + " (" + Math.round(w.employed/tot * 100) + "%)");
-  $("#network-info .unemployed").text(w.unemployed + " (" + Math.round(w.unemployed/tot * 100) + "%)");
-  if (!e || e.eventType === "networkChange")
-    $("#network-info .is-hiring-prob").probability("value", network.isHiringProb());
-}
-updateNetworkInfo();
-
 new FirmView("#selected-firm", netview);
+new NetInfo("#network-info", network);
 
 $(window).resize();
 
