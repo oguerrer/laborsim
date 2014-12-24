@@ -5,10 +5,11 @@ define([
   "random",
   "laborflows/model/network",
   "laborflows/views/netview",
+  "laborflows/views/firmview",
   "laborflows/controllers/simulation",
   "semanticui",
   "ui/probabilitybar"
-], function(_, $, d3, Random, Network, NetView, Simulation) {
+], function(_, $, d3, Random, Network, NetView, FirmView, Simulation) {
 
 $(window).resize(function() {
   $("svg").height(function() {return $(this).parent().height();})
@@ -50,42 +51,18 @@ var svg = d3.select("svg#simulation-netview")
     .attr("width", $("#simulation").innerWidth())
     .attr("height",  $("#simulation").innerHeight());
 
-var view = new NetView(svg, network);
+var netview = new NetView(svg, network);
 
 var sim = new Simulation("#simulator-controls", network);
 
 sim.on("speedChange", function(e) {
-  view.animationDuration = e.delay;
+  netview.animationDuration = e.delay;
   $("#speed-val").text(Math.ceil((1 - e.perc) * 100)+"%");
 });
 sim.stepDelay(300);
 
 $("#layout-simulation").on("click", function() {
-  view.layout();
-});
-
-$("#selected-firm .shutdown-firm").click(function(e){
-  if (selectedFirm === null) return;
-  selectedFirm.param('fireProb', 1);
-  selectedFirm.param('hireProb', 0);
-});
-$("#selected-firm .remove-firm").click(function(e){
-  if (selectedFirm === null) return;
-  network.removeFirm(selectedFirm);
-});
-$("#selected-firm .pin").click(function(e){
-  $('#selected-firm .fire-prob').toggleClass("mixed");
-});
-
-$('#selected-firm .fire-prob').probability({
-  onUserSetValue: function(p) {
-    selectedFirm.param("fireProb", p);
-  }
-});
-$('#selected-firm .hire-prob').probability({
-  onUserSetValue: function(p) {
-    selectedFirm.param("hireProb", p);
-  }
+  netview.layout();
 });
 
 $('#network-info .is-hiring-prob').probability({
@@ -94,69 +71,22 @@ $('#network-info .is-hiring-prob').probability({
   }
 });
 
-var selectedFirm = null;
+network.on("networkChange", updateNetworkInfo);
+network.on("simulationStep", updateNetworkInfo);
 
-network.on("networkChange", function(diff) {
-  if (selectedFirm !== null && _(diff.firmsChanged).has(selectedFirm.id())) {
-    updateFirmInfo();
-  }
-  updateNetworkInfo();
-  $("#network-info .is-hiring-prob").probability("value", network.isHiringProb());
-});
-network.on("simulationStep", function() {
-  updateFirmInfo();
-  updateNetworkInfo();
-});
 
-function updateNetworkInfo () {
+function updateNetworkInfo (e) {
   var w = network.numOfEmployees();
   var tot = network.numOfAffiliates();
   $("#network-info .totals").text(network.numOfFirms() + " firms, " + tot + " workers");
   $("#network-info .employed").text(w.employed + " (" + Math.round(w.employed/tot * 100) + "%)");
   $("#network-info .unemployed").text(w.unemployed + " (" + Math.round(w.unemployed/tot * 100) + "%)");
+  if (!e || e.eventType === "networkChange")
+    $("#network-info .is-hiring-prob").probability("value", network.isHiringProb());
 }
 updateNetworkInfo();
-$("#network-info .ui.progress").progress('set percent', network.isHiringProb());
 
-function unsetFirmInfo (e) {
-  selectedFirm = null;
-  $("#selected-firm").css("border-color", "black");
-  $("#selected-firm .name").text('---');
-  $("#selected-firm .name").text('---');
-  $("#selected-firm .employed").text('---');
-  $("#selected-firm .unemployed").text('---');
-  $("#selected-firm .ui.progress").addClass('disabled').probability("value", 0);
-  // $("#selected-firm .hire-prob").addClass('disabled');
-}
-unsetFirmInfo();
-
-function updateFirmInfo () {
-  var f = selectedFirm, p;
-  if (f === null) return;
-  if (!f.exists()) {
-    selectedFirm = null;
-    unsetFirmInfo();
-    return;
-  }
-  var w = f.numOfEmployees();
-  $("#selected-firm .name").text("Firm "+f.id());
-  $("#selected-firm .employed").text(w.employed);
-  $("#selected-firm .unemployed").text(w.unemployed);
-  $("#selected-firm .fire-prob").removeClass('disabled');
-  p = f.param("fireProb");
-  $("#selected-firm .fire-prob").probability("value", p);
-  $("#selected-firm .hire-prob").removeClass('disabled');
-  p = f.param("hireProb");
-  $("#selected-firm .hire-prob").probability("value", p);
-}
-
-view.on("firmSelected", function(e){
-  selectedFirm = e.firm;
-  $("#selected-firm").css("border-color", e.firmView.color);
-  updateFirmInfo();
-});
-view.on("firmUnselected", unsetFirmInfo);
-
+new FirmView("#selected-firm", netview);
 
 $(window).resize();
 
@@ -164,6 +94,6 @@ $(".with.popup").popup();
 
 console.log("LaborFlows rocks");
 
-return {net: network, view: view};
+return {net: network, netview: netview};
 
 });
