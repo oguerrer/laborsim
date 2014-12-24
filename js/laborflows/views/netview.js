@@ -17,9 +17,9 @@ function percSize (min, max, size, tot) {
   }
 }
 
+///// @todo: find a better home for color index generator
 var colormap = chroma.scale(["red", "green", "blue"]).mode('lab');
 
-//* @todo: find a better home for color index generator
 var colorShift = 1;
 var colorCount = 0;
 var nextColor = function() {
@@ -33,13 +33,15 @@ var nextColor = function() {
   }
   return color;
 };
-////////
+////////////////////////////////////////////////// TO BE REMOVED
 
 function NetView (svg, network, config) {
 
+  var firmElems = {};
+
   var conf = _(config || {}).clone();
   _(conf).defaults({
-    minFirmSize: 10,
+    minFirmSize: 3,
     avgFirmSize: 20,
     animationDuration: 200
   });
@@ -50,7 +52,7 @@ function NetView (svg, network, config) {
   this.id = function() {return vid;};
 
   var netview = this;
-  events(this, ["firmSelected", "firmUnselected"]);
+  events(this, ["selectionChange"]);
 
   var container = svg;
   var width = container.attr("width"),
@@ -62,16 +64,20 @@ function NetView (svg, network, config) {
   var zoom = d3.behavior.zoom()
       .scaleExtent([-10, 10])
       .translate([width/2 , height/2])
-      // .on("zoomstart", function() {d3.selectAll(".selected").classed("selected", false);})
+      .on("zoomstart", function() {
+        this.zoomPerformed = false;
+      })
       .on("zoom", function() {
         svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        this.zoomPerformed = true;
       })
       .on("zoomend", function() {
-        netview.trigger("firmUnselected");
+        if ( !this.zoomPerformed )
+          netview.unselectAll();
       });
   container.call(zoom);
 
-  var link = svg.append("g").selectAll(".link");
+  var link     = svg.append("g").selectAll(".link");
   var firmNode = svg.append("g").selectAll(".firmNode");
   var firmEmpl = svg.append("g").selectAll(".firmEmpl");
   var meanSize = 0;
@@ -123,12 +129,16 @@ function NetView (svg, network, config) {
         .attr("class", "link");
 
     firmNode = firmNode.data(nodes, nodekey);
-    firmNode.exit().remove();
+    firmNode.exit().each(function(d) {
+      delete firmElems[d.firm.id()];
+      delete selectedFirms[d.firm.id()];
+    }).remove();
     firmNode.enter().append("circle")
         .attr("class", "firmNode")
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
+        .each(function(d) {firmElems[d.firm.id()] = {unemployed: this};})
         .call(drag);
 
     firmNode.attr("r", function(d){
@@ -146,11 +156,13 @@ function NetView (svg, network, config) {
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return d.color;})
         .on("click", function(d) {
-          netview.trigger("firmSelected", {
-            firm: d.firm,
-            firmView: d,
-            rect: this.getBoundingClientRect()
-          });
+          if ( d3.event.shiftKey )
+            netview.toggleSelected(d.firm.id());
+          else
+            netview.select(d.firm.id());
+        })
+        .each(function(d) {
+          firmElems[d.firm.id()].employed = this;
         })
         .call(drag);
 
@@ -195,6 +207,64 @@ function NetView (svg, network, config) {
 
   this.layout = function() {
     force.start();
+  };
+
+  this.firmView = function(id) {
+    return _(firmElems[id]).clone();
+  };
+
+  var selectedFirms = {};
+
+  function _selectionInfo (id) {
+    return network.firm(id);
+  }
+
+  this.select = function(ids) {
+    if ( arguments.length !== 1 ) throw Error("select needs a FirmId");
+    if ( ! _(ids).isArray() ) ids = [ids];
+    selectedFirms = {};
+    for (var i in ids) {
+      selectedFirms[ids[i]] = _selectionInfo(ids[i]);
+    }
+    this.trigger("selectionChange", {action: "select", changed: ids});
+    return this;
+  };
+
+  this.selected = function(ids, val) {
+    if ( arguments.length === 0 ) {
+      return _(selectedFirms).values();
+    }
+    if ( arguments.length === 1 )
+      return _(selectedFirms).has(ids);
+    if ( ! _(ids).isArray() ) ids = [ids];
+    for (var i in ids) {
+      if ( val === false )
+        delete selectedFirms[ids[i]];
+      else
+        selectedFirms[ids[i]] = _selectionInfo(ids[i]);
+    }
+    this.trigger("selectionChange", {action: val ? "add" : "remove", changed: ids});
+    return this;
+  };
+
+  this.toggleSelected = function(id) {
+    if ( arguments.length !== 1 ) throw Error("toggleSelected needs a FirmId");
+    var val = _(selectedFirms).has(id);
+    if ( val )
+      delete selectedFirms[id];
+    else
+      selectedFirms[id] = _selectionInfo(id);
+    this.trigger("selectionChange", {action: val ? "remove" : "add", changed: [id]});
+    return this;
+  };
+
+  this.unselectAll = function() {
+    selectedFirms = {};
+    this.trigger("selectionChange", {action: "reset"});
+  };
+
+  this.network = function() {
+    return network;
   };
 
   this.destroy = function() {
