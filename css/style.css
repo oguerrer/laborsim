@@ -25,10 +25,8 @@ html {
     background: white;
 }
 
-
-.firmEmpl.selected {
-  stroke: #2C74E2;
-  stroke-width: 2px;
+.firmSel {
+  fill: #85A9E1;
 }
 
 .link {

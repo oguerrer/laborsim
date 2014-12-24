@@ -78,6 +78,7 @@ function NetView (svg, network, config) {
   container.call(zoom);
 
   var link     = svg.append("g").selectAll(".link");
+  var firmSel  = svg.append("g").selectAll(".firmSel");
   var firmNode = svg.append("g").selectAll(".firmNode");
   var firmEmpl = svg.append("g").selectAll(".firmEmpl");
   var meanSize = 0;
@@ -101,12 +102,13 @@ function NetView (svg, network, config) {
   function refreshView () {
 
     var links = network.links(),
-        nodes = network.firms(),
-        firmsNum = nodes.length;
+        firms = network.firms(),
+        firmsNum = firms.length,
+        selFirms;
 
-    meanSize = network.numOfAffiliates() / nodes.length;
+    meanSize = network.numOfAffiliates() / firms.length;
 
-    nodes = _(nodes).map(function(f, i) {
+    firms = _(firms).map(function(f, i) {
       if ( f.view[vid] === undefined ) {
         f.view[vid] = {
           firm: f,
@@ -123,12 +125,13 @@ function NetView (svg, network, config) {
       return {source: l.source.view[vid], target: l.target.view[vid]};
     });
 
+
     link = link.data(links);
     link.exit().remove();
     link.enter().append("line")
         .attr("class", "link");
 
-    firmNode = firmNode.data(nodes, nodekey);
+    firmNode = firmNode.data(firms, nodekey);
     firmNode.exit().each(function(d) {
       delete firmElems[d.firm.id()];
       delete selectedFirms[d.firm.id()];
@@ -148,7 +151,7 @@ function NetView (svg, network, config) {
     firmNode.append("title")
         .text(function(d) { return d.firm.id(); });
 
-    firmEmpl = firmEmpl.data(nodes, nodekey);
+    firmEmpl = firmEmpl.data(firms, nodekey);
     firmEmpl.exit().remove();
     firmEmpl.enter().append("circle")
         .attr("class", "firmEmpl")
@@ -171,7 +174,7 @@ function NetView (svg, network, config) {
     });
 
 
-    force.nodes(nodes)
+    force.nodes(firms)
          .links(links)
          .start();
 
@@ -186,6 +189,21 @@ function NetView (svg, network, config) {
       .attr("r", function(d){
         return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().employed, meanSize);
       });
+
+    selFirms = _(selectedFirms).map(function(f, i) {
+      return f.view[vid];
+    });
+    firmSel = firmSel.data(selFirms, nodekey);
+    firmSel.exit().remove();
+    firmSel.enter().append("circle")
+      .attr("class", "firmSel")
+      .attr("cx", function(d){return d.x;})
+      .attr("cy", function(d){return d.y;});
+
+    firmSel.transition().duration(netview.animationDuration)
+      .attr("r", function(d){
+        return 5 + percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfAffiliates(), meanSize);
+      });
   }
 
   force.on("tick", function() {
@@ -198,6 +216,8 @@ function NetView (svg, network, config) {
             .attr("cy", function(d) { return d.y; });
     firmEmpl.attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; });
+    firmSel.attr("cx", function(d) { return d.x; })
+           .attr("cy", function(d) { return d.y; });
   });
 
 
@@ -226,6 +246,7 @@ function NetView (svg, network, config) {
     for (var i in ids) {
       selectedFirms[ids[i]] = _selectionInfo(ids[i]);
     }
+    updateView();
     this.trigger("selectionChange", {action: "select", changed: ids});
     return this;
   };
@@ -243,6 +264,7 @@ function NetView (svg, network, config) {
       else
         selectedFirms[ids[i]] = _selectionInfo(ids[i]);
     }
+    updateView();
     this.trigger("selectionChange", {action: val ? "add" : "remove", changed: ids});
     return this;
   };
@@ -254,12 +276,14 @@ function NetView (svg, network, config) {
       delete selectedFirms[id];
     else
       selectedFirms[id] = _selectionInfo(id);
+    updateView();
     this.trigger("selectionChange", {action: val ? "remove" : "add", changed: [id]});
     return this;
   };
 
   this.unselectAll = function() {
     selectedFirms = {};
+    updateView();
     this.trigger("selectionChange", {action: "reset"});
   };
 
