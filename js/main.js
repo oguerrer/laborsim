@@ -13,8 +13,11 @@ define([
 ], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation) {
 
 $(window).resize(function() {
-  $("svg").height(function() {return $(this).parent().height();})
-          .width(function() {return $(this).parent().width();});
+  $("svg")
+    .height(function() {return $(this).parent().innerHeight();})
+    .width(function() {return $(this).parent().innerWidth();})
+    .attr("width", function() {return $(this).width();})
+    .attr("height", function() {return $(this).height();});
 });
 
 var rand = new Random(Random.engines.mt19937().autoSeed());
@@ -47,10 +50,9 @@ addRandomFirms();
 
 $("#random-firms").on("click", addRandomFirms);
 
+$(window).resize();
 
-var svg = d3.select("svg#simulation-netview")
-    .attr("width", $("#simulation").innerWidth())
-    .attr("height",  $("#simulation").innerHeight());
+var svg = d3.select("svg#simulation-netview");
 
 var netview = new NetView(svg, network);
 
