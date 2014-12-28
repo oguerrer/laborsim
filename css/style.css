@@ -150,3 +150,44 @@ html {
 .ui.card > .extra .header {
   font-size: 100% !important;
 }
+
+/*------------------------------
+             Charts
+------------------------------*/
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.chart-line {
+  fill: none;
+  /*stroke: #4682B4;*/
+  stroke-width: 1.5px;
+}
+.chart-line:hover {
+  stroke-width: 3px;
+}
+
+.ui.cards > .card > .chart,
+.ui.card > .chart {
+  display: block;
+  position: relative;
+  padding: 0em;
+  background: rgba(0, 0, 0, 0.05);
+}
+.ui.cards > .card > .chart > svg,
+.ui.card > .chart > svg {
+  font-size: 50%;
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.2857rem 0.2857rem 0em 0em;
+  border: none;
+}
+.ui.cards > .card > .chart:only-child > svg,
+.ui.card > .chart:only-child > svg {
+  border-radius: 0.2857rem;
+}
