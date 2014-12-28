@@ -71,11 +71,7 @@ function FirmView(domElem, net) {
     }
   });
   selFirmInfo.find(".remove-firm").click(function(e){
-    var sel = _getSel();
-    for ( var i in sel ){
-      //* @todo optimise this to avoid multiple networkChange events
-      network.removeFirm(sel[i]);
-    }
+    network.removeFirm(_getSel());
   });
   selFirmInfo.find(".pin").click(function(e){
     var container = selFirmInfo.parent();
