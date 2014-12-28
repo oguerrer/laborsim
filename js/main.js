@@ -8,9 +8,10 @@ define([
   "laborflows/views/firmview",
   "laborflows/views/netinfo",
   "laborflows/controllers/simulation",
+  "laborflows/views/charts/timeseries",
   "semanticui",
   "ui/probabilitybar"
-], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation) {
+], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation, TimeSeries) {
 
 $(window).resize(function() {
   $("svg")
@@ -68,15 +69,31 @@ $("#layout-simulation").on("click", function() {
   netview.layout();
 });
 
+
 new FirmView("#selected-firm", netview);
 new NetInfo("#network-info", network);
 
-$(window).resize();
+var ts = new TimeSeries(".unemployment-rate svg", {range: [0,1], series: {UR: {label: "Unemployment rate"}}});
+$(".unemployment-rate .recycle").click(function() {
+  ts.reset();
+});
+$(".unemployment-rate .history").click(function() {
+  if (ts.timeFrame()){
+    ts.noTimeFrame();
+    $(this).removeClass("blue");
+  } else {
+    ts.clipTimeFrame();
+    $(this).addClass("blue");
+  }
+});
+network.on("simulationStep", function() {
+  ts.addPoint({UR: network.numOfEmployees().unemployed / network.numOfAffiliates()});
+});
 
 $(".with.popup").popup();
 
 console.log("LaborFlows rocks");
 
-return {net: network, netview: netview};
+return {net: network, netview: netview, chart: ts};
 
 });
