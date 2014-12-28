@@ -61,6 +61,8 @@ function NetView (svg, network, config) {
   var width = container.attr("width"),
       height = container.attr("height");
 
+  var focus = { x: 0, y:0 };
+
   svg = container.append("g");
   svg.attr("transform", "translate("+(width/2)+","+(height/2)+")");
 
@@ -89,6 +91,7 @@ function NetView (svg, network, config) {
   var force = d3.layout.force()
       // .charge(-40*conf.avgFirmSize)
       .charge(function(d) {return percSize(-500, -1500, d.firm.numOfAffiliates(), meanSize);})
+      .alpha(0.8)
       .linkStrength(0.1);
       // .friction(.8)
       // .linkDistance(200);
@@ -115,7 +118,7 @@ function NetView (svg, network, config) {
       if ( f.view[vid] === undefined ) {
         f.view[vid] = {
           firm: f,
-          x: 200-Math.random()*400, y: 200-Math.random()*400,
+          x: focus.x+200-Math.random()*400, y: focus.y+200-Math.random()*400,
           color: colormap(nextColor())
         };
       }
@@ -153,6 +156,12 @@ function NetView (svg, network, config) {
 
     firmNode.append("title")
         .text(function(d) { return d.firm.id(); });
+
+    selFirms = _(selectedFirms).map(function(f, i) {
+      return f.view[vid];
+    });
+    firmSel = firmSel.data(selFirms, nodekey);
+    firmSel.exit().remove();
 
     firmEmpl = firmEmpl.data(firms, nodekey);
     firmEmpl.exit().remove();
@@ -193,7 +202,7 @@ function NetView (svg, network, config) {
         return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().employed, meanSize);
       });
 
-    selFirms = _(selectedFirms).map(function(f, i) {
+    var selFirms = _(selectedFirms).map(function(f, i) {
       return f.view[vid];
     });
     firmSel = firmSel.data(selFirms, nodekey);
@@ -242,6 +251,19 @@ function NetView (svg, network, config) {
     return network.firm(id);
   }
 
+  function _triggerSelChange (action, changed) {
+    updateView();
+    var sel = _(selectedFirms).values()[0];
+    if ( sel ) {
+      focus.x = sel.view[vid].x;
+      focus.y = sel.view[vid].y;
+    } else {
+      focus.x = 0;
+      focus.y = 0;
+    }
+    netview.trigger("selectionChange", {action: action, changed: changed});
+  }
+
   this.select = function(ids) {
     if ( arguments.length !== 1 ) throw Error("select needs a FirmId");
     if ( ! _(ids).isArray() ) ids = [ids];
@@ -249,8 +271,7 @@ function NetView (svg, network, config) {
     for (var i in ids) {
       selectedFirms[ids[i]] = _selectionInfo(ids[i]);
     }
-    updateView();
-    this.trigger("selectionChange", {action: "select", changed: ids});
+    _triggerSelChange("select", ids);
     return this;
   };
 
@@ -267,8 +288,7 @@ function NetView (svg, network, config) {
       else
         selectedFirms[ids[i]] = _selectionInfo(ids[i]);
     }
-    updateView();
-    this.trigger("selectionChange", {action: val ? "add" : "remove", changed: ids});
+    _triggerSelChange(val ? "add" : "remove", ids);
     return this;
   };
 
@@ -279,15 +299,14 @@ function NetView (svg, network, config) {
       delete selectedFirms[id];
     else
       selectedFirms[id] = _selectionInfo(id);
-    updateView();
-    this.trigger("selectionChange", {action: val ? "remove" : "add", changed: [id]});
+    _triggerSelChange(val ? "remove" : "add", [id]);
     return this;
   };
 
   this.unselectAll = function() {
     selectedFirms = {};
-    updateView();
-    this.trigger("selectionChange", {action: "reset"});
+    _triggerSelChange("reset");
+    return this;
   };
 
   this.network = function() {
