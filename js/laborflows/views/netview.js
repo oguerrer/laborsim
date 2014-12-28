@@ -36,6 +36,9 @@ var nextColor = function() {
 ////////////////////////////////////////////////// TO BE REMOVED
 
 function NetView (svg, network, config) {
+  if (!(this instanceof NetView)) {return new NetView(svg, network, config);}
+
+  if ( _(svg).isString() ) svg = d3.select(svg);
 
   var firmElems = {};
 
