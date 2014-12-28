@@ -12,19 +12,23 @@
       if ( m === undefined )
         return this.options.mixed;
 
+      if (this._dragging) return this;
+
       this.options.mixed = m;
       this._update();
+      return this;
     },
 
     value: function(p) {
       if ( p === undefined )
         return this.options.value;
 
-      if ( this._dragging ) return;
+      if ( this._dragging ) return this;
 
       this.options.value = p;
       this.options.mixed = false;
       this._update();
+      return this;
     },
 
     // _setOption: function( key, value ) {
