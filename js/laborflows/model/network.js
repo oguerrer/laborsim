@@ -306,21 +306,27 @@ function Network(networkSpec){
     return this;
   };
 
-  this.removeFirm = function(f) {
-    if ( _knownFirm(f) ) {
-      var firm = _lookupFirm(f);
-      for( var g in firms[f].neighbors ){
-        delete firms[g].neighbors[f];
+  this.removeFirm = function(fs) {
+    if ( !_(fs).isArray() ) fs = [fs];
+
+    var diff = {};
+    for ( var i in fs ){
+      var f = fs[i];
+      if ( _knownFirm(f) ) {
+        var firm = _lookupFirm(f);
+        for( var g in firms[f].neighbors ){
+          delete firms[g].neighbors[f];
+        }
+        _removeWorkers(f);
+        delete firms[f];
+        _invalidateHandle(FirmHandle, firm);
+        firm.trigger("removed");
+        diff[firm.id()] = firm;
+      } else {
+        console.warn("Trying to remove unknown firm '"+f+"'");
       }
-      _removeWorkers(f);
-      delete firms[f];
-      _invalidateHandle(FirmHandle, firm);
-      firm.trigger("removed");
-      var diff = {}; diff[firm.id()] = firm;
-      this.trigger("networkChange", {firmsRemoved: diff});
-    } else {
-      console.warn("Trying to remove unknown firm '"+f+"'");
     }
+    this.trigger("networkChange", {firmsRemoved: diff});
     return this;
   };
 
