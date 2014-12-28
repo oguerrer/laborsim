@@ -108,6 +108,27 @@ network.on("simulationStep", function() {
 
 $(".with.popup").popup();
 
+$(window).keyup(function( event ) {
+  // console.log(event, event.keyCode);
+  switch (event.keyCode) {
+      case 8: // backspace
+      case 46: { // delete
+        network.removeFirm(netview.selected());
+        break;
+      }
+      case 65: { // delete
+        if (event.ctrlKey) {
+          if (event.shiftKey)
+            netview.unselectAll();
+          else
+            netview.select(network.firms());
+          event.preventDefault();
+        }
+        break;
+      }
+    }
+});
+
 console.log("LaborFlows rocks");
 
 return {net: network, netview: netview, chart: ts};
