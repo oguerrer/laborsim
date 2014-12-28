@@ -25,13 +25,24 @@ html {
     background: white;
 }
 
+.firmEmpl {
+  cursor: pointer;
+}
+
 .firmSel {
-  fill: #85A9E1;
+  /*fill: #85A9E1;*/
+  stroke: #4D81D1;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-dasharray: 4px;
+  fill: transparent;
+  vector-effect: non-scaling-stroke;
 }
 
 .link {
   stroke: #999;
   stroke-width: 1.5px;
+  /*vector-effect: non-scaling-stroke;*/
 }
 
 /*------------------------------
