@@ -73,6 +73,22 @@ $("#layout-simulation").on("click", function() {
 new FirmView("#selected-firm", netview);
 new NetInfo("#network-info", network);
 
+$("#network-info .add-firm").click(function() {
+  var id = "F"+lastRandFirm;
+  network.addFirm(id, {
+    hireProb: rand.real(0,1),
+    fireProb: rand.real(0,1),
+    isHiringProb: rand.real(0,1),
+    neighbors: netview.selected(),
+    workers: [
+      {num: rand.integer(10,100), employed: true},
+      {num: rand.integer(10,100), employed: false}
+    ]
+  });
+  netview.select(id);
+  lastRandFirm++;
+});
+
 var ts = new TimeSeries(".unemployment-rate svg", {range: [0,1], series: {UR: {label: "Unemployment rate"}}});
 $(".unemployment-rate .recycle").click(function() {
   ts.reset();
