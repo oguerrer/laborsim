@@ -108,7 +108,7 @@ network.on("simulationStep", function() {
 
 $(".with.popup").popup();
 
-$(window).keyup(function( event ) {
+$(window).keydown(function( event ) {
   // console.log(event, event.keyCode);
   switch (event.keyCode) {
       case 8: // backspace
