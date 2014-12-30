@@ -157,6 +157,7 @@ function ScatterPlot (svg, options) {
         .append("circle")
         .attr("class", "chart-dot")
         .attr("r", radius)
+        .attr("fill", series[s].color)
         .append("title").text(series[s].label);
 
       series[s].dots
@@ -178,8 +179,15 @@ function ScatterPlot (svg, options) {
     return this;
   };
 
-  this.removeSeries = function(name) {
-    delete series[name];
+  this.removeSeries = function(names) {
+    if ( !names ) names = _(series).keys();
+    if ( !_(names).isArray() ) names = [names];
+    for ( var i in names ){
+      var name = names[i];
+      series[name].dotsGroup.remove();
+      delete series[name];
+    }
+    _updateChart();
     return this;
   };
 
