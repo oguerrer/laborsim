@@ -20,6 +20,9 @@ var DEFAULT_OPTIONS = {
 
 var DEFAULT_COLOR = "#4682B4";
 
+function _min (a, b) { return (a || b) < (b || a) ? a : b; }
+function _max (a, b) { return (a || b) < (b || a) ? b : a; }
+
 function TimeSeries (svg, options) {
   if (!(this instanceof TimeSeries)) {return new TimeSeries(svg, options);}
 
@@ -55,7 +58,7 @@ function TimeSeries (svg, options) {
   var series = {}, data = [];
 
   if (_(options.series).isArray()) {
-    for (var i in series)
+    for (var i in options.series)
       _addSeries(series[i], {});
   } else {
     for (var s in options.series)
@@ -85,7 +88,7 @@ function TimeSeries (svg, options) {
 
   _updateChart();
 
-  var container = $(svg).parent();
+  var container = $(svg.node()).parent();
   function _unsetTitle () {
     container.attr("title","");
   }
@@ -97,9 +100,11 @@ function TimeSeries (svg, options) {
     if (_(series).has(name)) throw Error("Series '"+name+"' exists already!");
 
     opt = opt || {};
-    opt.label = opt.label || (name+"");
-    opt.color = opt.color || DEFAULT_COLOR;
-    opt.data = opt.data || [];
+    _(opt).defaults({
+      label: (name+""),
+      color: DEFAULT_COLOR,
+      data: [],
+    });
 
     var i = data.length, j = opt.data.length;
 
@@ -116,17 +121,17 @@ function TimeSeries (svg, options) {
          .attr("class", "chart-line")
          .style("stroke", opt.color);
 
+    if ( opt.class ) opt.path.classed(opt.class, true);
+
     opt.line = d3.svg.line()
       .x(_ptx)
       .y(function(d) { return y(d[name] || 0); });
 
     series[name] = opt;
 
-    var exty = d3.extent(data, function(d) {return d[name];});
-    if ( exty[0] !== undefined && yDomain[0] !== undefined )
-      yDomain[0] = Math.min(exty[0], yDomain[0]);
-    if ( exty[1] !== undefined && yDomain[1] !== undefined )
-      yDomain[1] = Math.max(exty[1], yDomain[1]);
+    var exty = d3.extent(data, function(d) {return d[name] || 0;});
+    yDomain[0] = _min(exty[0], yDomain[0]);
+    yDomain[1] = _max(exty[1], yDomain[1]);
   }
 
   function _updateChart () {
@@ -192,6 +197,7 @@ function TimeSeries (svg, options) {
   };
 
   this.removeSeries = function(name) {
+    series[name].path.remove();
     delete series[name];
     for ( var i in data )
       delete data[i][name];
@@ -213,8 +219,8 @@ function TimeSeries (svg, options) {
     data.push({});
     for ( var s in series ){
       pt = pts[s] || (last > 0 ? data[last][s] : 0);
-      yDomain[0] = yDomain[0] === undefined ? pt : Math.min(yDomain[0], pt);
-      yDomain[1] = yDomain[1] === undefined ? pt : Math.max(yDomain[1], pt);
+      yDomain[0] = yDomain[0] === undefined ? pt : _min(yDomain[0], pt);
+      yDomain[1] = yDomain[1] === undefined ? pt : _max(yDomain[1], pt);
       data[last+1][s] = pt;
     }
     time++;
@@ -237,7 +243,7 @@ function TimeSeries (svg, options) {
 
   this.reset = function() {
     time = 0;
-    yDomain = [0,0];
+    yDomain = [undefined, undefined];
     data.splice(0);
     _updateChart();
     return this;
