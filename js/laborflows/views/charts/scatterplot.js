@@ -157,15 +157,11 @@ function ScatterPlot (svg, options) {
         .append("circle")
         .attr("class", "chart-dot")
         .attr("r", radius)
-        .attr("cx", cx)
-        .attr("cy", cy)
-        .style("fill", series[s].color)
         .append("title").text(series[s].label);
 
-      if ( xRangeMode === AUTO_RANGE || yRangeMode === AUTO_RANGE )
-        series[s].dots
-          .attr("cx", cx)
-          .attr("cy", cy);
+      series[s].dots
+        .attr("cx", cx)
+        .attr("cy", cy);
     }
   }
 
@@ -221,22 +217,26 @@ function ScatterPlot (svg, options) {
   this.chart = function() {return chart;};
 
   function _xRange (b) {
-    if ( b === undefined ) return xRangeMode === AUTO_RANGE ? "auto" : xRange;
+    if ( b === undefined )
+      return _.clone(xRangeMode === AUTO_RANGE ? xDomain : xRange);
     xRangeMode = b === "auto" ? AUTO_RANGE : FIXED_RANGE;
-    if ( b === "auto" ) xRange = b;
+    if ( b !== "auto" ) xRange = b;
     _updateChart();
     return this;
   }
   this.xRange = _xRange;
 
   function _yRange (b) {
-    if ( b === undefined ) return yRangeMode === AUTO_RANGE ? "auto" : yRange;
+    if ( b === undefined )
+      return _.clone(yRangeMode === AUTO_RANGE ? yDomain : yRange);
     yRangeMode = b === "auto" ? AUTO_RANGE : FIXED_RANGE;
-    if ( b === "auto" ) yRange = b;
+    if ( b !== "auto" ) yRange = b;
     _updateChart();
     return this;
   }
   this.yRange = _yRange;
+
+  this.localCoord = function(pt) {return {x: x(pt.x), y: y(pt.y)};};
 
   $(window).resize(function() {
     _updateChart();

@@ -255,8 +255,19 @@ function TimeSeries (svg, options) {
     return this;
   };
 
+  function _range (b) {
+    if ( b === undefined )
+      return _.clone(rangeMode === AUTO_RANGE ? yDomain : range);
+    rangeMode = b === "auto" ? AUTO_RANGE : FIXED_RANGE;
+    if ( b !== "auto" ) range = b;
+    _updateChart();
+    return this;
+  }
+  this.range = _range;
+
   this.chart = function() {return chart;};
 
+  this.localCoord = function(pt) {return {x: x(pt.x), y: y(pt.y)};};
 
   $(window).resize(function() {
     _updateChart();
