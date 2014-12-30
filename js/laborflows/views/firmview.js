@@ -16,7 +16,8 @@ function FirmView(domElem, net) {
       employed = selFirmInfo.find(".employed"),
       unemployed = selFirmInfo.find(".unemployed"),
       fireProb = selFirmInfo.find(".fire-prob"),
-      hireProb = selFirmInfo.find(".hire-prob");
+      hireProb = selFirmInfo.find(".hire-prob"),
+      linkicon = selFirmInfo.find(".link-firms");
 
   var network, firm, mode;
   var _getSel;
@@ -36,6 +37,7 @@ function FirmView(domElem, net) {
     _getSel = function() {return (firm.exists() ? [firm] : []);};
     selFirmInfo.find("i.pin").hide();
     selFirmInfo.find("i.remove").show();
+    linkicon.hide();
   }
 
   this.selFirmInfo = function() {return selFirmInfo;};
@@ -84,6 +86,13 @@ function FirmView(domElem, net) {
   selFirmInfo.find(".remove").click(function(e){
     _destroy();
   });
+  linkicon.click(function(e) {
+    var sel = _getSel();
+    if ( sel.length === 2 ){
+      var a = sel[0], b = sel[1];
+      network.link(a, b, !network.link(a, b));
+    }
+  });
 
   function updateInfo () {
     var sel = _getSel();
@@ -98,7 +107,17 @@ function FirmView(domElem, net) {
         name = "Firm " + f.id();
         fireProb.probability("value", f.param("fireProb"));
         hireProb.probability("value", f.param("hireProb"));
+        linkicon.addClass("disabled");
       } else {
+        if ( sel.length === 2 ){
+          linkicon.removeClass("disabled");
+          if ( network.link(sel[0], sel[1]) )
+            linkicon.addClass("unlink").removeClass("linkify");
+          else
+            linkicon.addClass("linkify").removeClass("unlink");
+        } else {
+          linkicon.addClass("disabled");
+        }
         var commFireProb = sel[0].param("fireProb"), fireCommon = true,
             commHireProb = sel[0].param("hireProb"), hireCommon = true,
             fw;
