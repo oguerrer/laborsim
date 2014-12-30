@@ -38,12 +38,14 @@ function UnknownWorker (id) {
 
 
 function Network(networkSpec){
+  if (!(this instanceof Network)) {return new Network(networkSpec);}
+
   // @todo logic to implement:
   //  - networkSpec is Network ⇒ deep copy
   //  - networkSpec is JSON obj ⇒ initialise accordingly
 
   var firms = {};
-  var workforce = {};
+  var workforce = {}, workforceLen = 0;
   var workerMarker = 0;
 
   var isHiringProb = 0.5;
@@ -118,6 +120,11 @@ function Network(networkSpec){
     }
     return w.state[s];
   };
+
+  function _notifyChange (arg) {
+    workforceLen = _(workforce).keys().length; // optimisation
+    net.trigger("networkChange", arg);
+  }
 
   function _lookupFirm (id) {
     if(_(firms).has(id))
@@ -211,7 +218,7 @@ function Network(networkSpec){
           firms[id].param[k] = v;
           firm.trigger("changed", {param: k, from: old, to: v});
           var diff = {}; diff[firm.id()] = firm;
-          net.trigger("networkChange", {firmsChanged: diff});
+          _notifyChange({firmsChanged: diff});
         }
         return this;
       }
@@ -232,7 +239,7 @@ function Network(networkSpec){
           firms[id].state[k] = v;
           firm.trigger("changed", {state: k, from: old, to: v});
           var diff = {}; diff[firm.id()] = firm;
-          this.trigger("networkChange", {firmsChanged: diff});
+          _notifyChange({firmsChanged: diff});
         }
         return this;
       }
@@ -247,7 +254,7 @@ function Network(networkSpec){
     if ( p < 0 ) p = 0;
     if ( p > 1 ) p = 1;
     isHiringProb = p;
-    net.trigger("networkChange", {isHiringProb: isHiringProb});
+    _notifyChange({isHiringProb: isHiringProb});
     return net;
   };
 
@@ -262,7 +269,7 @@ function Network(networkSpec){
       _updateFirmFromSpec(id, spec);
       firm.trigger("changed", {newspec: true});
       var diff = {}; diff[firm.id()] = firm;
-      this.trigger("networkChange", {firmsChanged: diff});
+      _notifyChange({firmsChanged: diff});
     }
     return firm;
   };
@@ -302,7 +309,7 @@ function Network(networkSpec){
       }
     }
 
-    if(!(_(diff).isEmpty())) this.trigger("networkChange", {firmsAdded: diff});
+    if( !_(diff).isEmpty() ) _notifyChange({firmsAdded: diff});
     return this;
   };
 
@@ -326,7 +333,7 @@ function Network(networkSpec){
         console.warn("Trying to remove unknown firm '"+f+"'");
       }
     }
-    this.trigger("networkChange", {firmsRemoved: diff});
+    _notifyChange({firmsRemoved: diff});
     return this;
   };
 
@@ -375,7 +382,7 @@ function Network(networkSpec){
     if( arguments.length === 3 ){
       if( !(_(f2).isArray()) ) f2 = [f2];
       var diff = _addLinks(f1, f2, label);
-      this.trigger("networkChange", diff);
+      _notifyChange(diff);
       return this;
     }
     throw Error("Wrong arguments passed to 'link' method");
@@ -423,7 +430,7 @@ function Network(networkSpec){
     var firm = _lookupFirm(id);
     var ws = _addWorkers(firm, wspec);
     firm.trigger("changed", {newspec: true});
-    this.trigger("networkChange", {firmsChanged: [firm]});
+    _notifyChange({firmsChanged: [firm]});
     return this;
   };
 
@@ -447,14 +454,12 @@ function Network(networkSpec){
 
   // faster then sum of _numOfEmployees
   function _numOfAffiliates (firm) {
-    var wrks;
     if(arguments.length === 0){
-      wrks = workforce;
+      return workforceLen;
     } else {
       _lookupFirm(firm);
-      wrks = firms[firm].workers;
+      return _(firms[firm].workers).size();
     }
-    return _(wrks).size();
   }
 
   this.numOfEmployees = _numOfEmployees;
