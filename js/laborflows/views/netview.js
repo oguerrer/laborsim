@@ -62,6 +62,7 @@ function NetView (svg, network, config) {
       height = container.attr("height");
 
   var focus = { x: 0, y:0 };
+  this.focus = focus;
 
   svg = container.append("g");
   svg.attr("transform", "translate("+(width/2)+","+(height/2)+")");
@@ -91,7 +92,7 @@ function NetView (svg, network, config) {
   var force = d3.layout.force()
       // .charge(-40*conf.avgFirmSize)
       .charge(function(d) {return percSize(-500, -1500, d.firm.numOfAffiliates(), meanSize);})
-      .alpha(0.8)
+      .alpha(5)
       .linkStrength(0.1);
       // .friction(.8)
       // .linkDistance(200);
@@ -148,14 +149,12 @@ function NetView (svg, network, config) {
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
         .each(function(d) {firmElems[d.firm.id()] = {unemployed: this};})
-        .call(drag);
+        .call(drag)
+        .append("title").text(function(d) { return d.firm.id(); });
 
     firmNode.attr("r", function(d){
       return percSize(conf.minFirmSize, conf.avgFirmSize,  d.firm.numOfAffiliates(), meanSize);
     });
-
-    firmNode.append("title")
-        .text(function(d) { return d.firm.id(); });
 
     selFirms = _(selectedFirms).map(function(f, i) {
       return f.view[vid];
@@ -179,7 +178,8 @@ function NetView (svg, network, config) {
         .each(function(d) {
           firmElems[d.firm.id()].employed = this;
         })
-        .call(drag);
+        .call(drag)
+        .append("title").text(function(d) { return d.firm.id(); });
 
     firmEmpl.attr("r", function(d){
       return percSize(conf.minFirmSize, conf.avgFirmSize, d.firm.numOfEmployees().employed, meanSize);
