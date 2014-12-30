@@ -15,13 +15,20 @@ var DEFAULT_OPTIONS = {
       bottom: 20,
       left: 20,
       range: "auto",
+      minRange: [undefined, undefined],
       timeFrame: undefined
     };
 
 var DEFAULT_COLOR = "#4682B4";
 
-function _min (a, b) { return (a || b) < (b || a) ? a : b; }
-function _max (a, b) { return (a || b) < (b || a) ? b : a; }
+function _min (a, b) {
+  var m = _.min([a, b]);
+  return  ( m === Infinity ) ? undefined : m;
+}
+function _max (a, b) {
+  var m = _.max([a, b]);
+  return  ( m === -Infinity ) ? undefined : m;
+}
 
 function TimeSeries (svg, options) {
   if (!(this instanceof TimeSeries)) {return new TimeSeries(svg, options);}
@@ -44,12 +51,11 @@ function TimeSeries (svg, options) {
   var timeFrame = options.timeFrame,
       rangeMode = options.range === "auto" ? AUTO_RANGE : FIXED_RANGE,
       range;
-  if (rangeMode === AUTO_RANGE) {
-    range = [0,0];
-  } else {
-    range = d3.extent(options.range);
-  }
-  var yDomain = [undefined, undefined];
+
+  range = rangeMode === AUTO_RANGE ? [0,1] : d3.extent(options.range);
+
+  var minRange = options.minRange || [undefined, undefined],
+      yDomain = minRange;
 
   var chart = svg
         .append("g")
@@ -243,7 +249,7 @@ function TimeSeries (svg, options) {
 
   this.reset = function() {
     time = 0;
-    yDomain = [undefined, undefined];
+    yDomain = minRange;
     data.splice(0);
     _updateChart();
     return this;

@@ -15,6 +15,8 @@ var DEFAULT_OPTIONS = {
       right: 10,
       bottom: 20,
       left: 20,
+      xMinRange: [undefined, undefined],
+      yMinRange: [undefined, undefined],
       xRange: "auto",
       yRange: "auto"
     };
@@ -22,8 +24,14 @@ var DEFAULT_OPTIONS = {
 var DEFAULT_COLOR = "#4682B4";
 var DEFAULT_RADIUS = 2;
 
-function _min (a, b) { return (a || b) < (b || a) ? (a || b) : (b || a); }
-function _max (a, b) { return (a || b) < (b || a) ? (b || a) : (a || b); }
+function _min (a, b) {
+  var m = _.min([a, b]);
+  return  ( m === Infinity ) ? undefined : m;
+}
+function _max (a, b) {
+  var m = _.max([a, b]);
+  return  ( m === -Infinity ) ? undefined : m;
+}
 
 function ScatterPlot (svg, options) {
   if (!(this instanceof ScatterPlot)) {return new ScatterPlot(svg, options);}
@@ -45,11 +53,13 @@ function ScatterPlot (svg, options) {
 
   var xRangeMode = options.xRange === "auto" ? AUTO_RANGE : FIXED_RANGE, xRange,
       yRangeMode = options.yRange === "auto" ? AUTO_RANGE : FIXED_RANGE, yRange;
-  xRange = xRangeMode === AUTO_RANGE ? d3.extent(options.xRange) : [0,1];
-  xRange = xRangeMode === AUTO_RANGE ? d3.extent(options.yRange) : [0,1];
+  xRange = xRangeMode === AUTO_RANGE ? [0,1] : d3.extent(options.xRange);
+  xRange = xRangeMode === AUTO_RANGE ? [0,1] : d3.extent(options.yRange);
 
-  var xDomain = [undefined, undefined],
-      yDomain = [undefined, undefined];
+  var xMinRange = options.xMinRange || [undefined, undefined],
+      yMinRange = options.yMinRange || [undefined, undefined],
+      xDomain = xMinRange,
+      yDomain = yMinRange;
 
   var chart = svg
         .append("g")
@@ -200,6 +210,8 @@ function ScatterPlot (svg, options) {
   };
 
   this.reset = function() {
+    xDomain = xMinRange;
+    yDomain = yMinRange;
     for ( var s in series )
       series[s].data.splice(0);
     _updateChart();
@@ -211,7 +223,7 @@ function ScatterPlot (svg, options) {
   function _xRange (b) {
     if ( b === undefined ) return xRangeMode === AUTO_RANGE ? "auto" : xRange;
     xRangeMode = b === "auto" ? AUTO_RANGE : FIXED_RANGE;
-    xRange = b === "auto" ? [0,1] : b;
+    if ( b === "auto" ) xRange = b;
     _updateChart();
     return this;
   }
@@ -220,7 +232,7 @@ function ScatterPlot (svg, options) {
   function _yRange (b) {
     if ( b === undefined ) return yRangeMode === AUTO_RANGE ? "auto" : yRange;
     yRangeMode = b === "auto" ? AUTO_RANGE : FIXED_RANGE;
-    yRange = b === "auto" ? [0,1] : b;
+    if ( b === "auto" ) yRange = b;
     _updateChart();
     return this;
   }
