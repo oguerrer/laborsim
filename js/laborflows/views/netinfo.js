@@ -22,23 +22,29 @@ function NetInfo(domNode, network) {
     }
   });
 
-  network.on("networkChange", updateNetworkInfo);
+  network.on("networkChange", initNetworkInfo);
   network.on("simulationStep", updateNetworkInfo);
 
-  function updateNetworkInfo (e) {
+  function updateNetworkInfo (diff) {
+    var tot = diff.employed + diff.unemployed;
+    employed.text(diff.employed + " (" + Math.round(diff.employed/tot * 100) + "%)");
+    unemployed.text(diff.unemployed + " (" + Math.round(diff.unemployed/tot * 100) + "%)");
+  }
+
+  function initNetworkInfo () {
     var w = network.numOfEmployees();
     var tot = network.numOfAffiliates();
     totals.text(network.numOfFirms() + " firms, " + tot + " workers");
     employed.text(w.employed + " (" + Math.round(w.employed/tot * 100) + "%)");
     unemployed.text(w.unemployed + " (" + Math.round(w.unemployed/tot * 100) + "%)");
-    if (!e || e.eventType === "networkChange")
-      isHiringProb.probability("value", network.isHiringProb());
+    isHiringProb.probability("value", network.isHiringProb());
   }
-  updateNetworkInfo();
+
+  initNetworkInfo();
 
   this.destroy = function() {
     netinfo.remove();
-    network.off("networkChange", updateNetworkInfo);
+    network.off("networkChange", initNetworkInfo);
     network.off("simulationStep", updateNetworkInfo);
   };
 }
