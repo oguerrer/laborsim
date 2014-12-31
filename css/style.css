@@ -107,20 +107,20 @@ html {
 *******************************/
 
 #dashboard {
-    position: absolute;
-    margin: 0;
-    width: 45%;
-    right: 0px;
-    top: 37px;
-    bottom: 0px;
-    padding: 5px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-left: 1px solid #CCCCCC;
+  position: absolute;
+  margin: 0;
+  width: 45%;
+  right: 0px;
+  top: 37px;
+  bottom: 0px;
+  padding: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-left: 1px solid #CCCCCC;
 }
 
 #dashboard .ui.card .description .field {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 #dashboard .ui.two.cards {
