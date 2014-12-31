@@ -478,7 +478,13 @@ function Network(networkSpec){
 
     num = num || 1;
 
-    var diff = {changedFirms: {}, hiredWorkers: {}, firedWorkers: {}};
+    var diff = {
+      changedFirms: {},
+      hiredWorkers: {},
+      firedWorkers: {},
+      employed: 0,
+      unemployed: 0
+    };
     var old;
 
     for ( var i=0; i < num; i++ ) {
@@ -512,6 +518,7 @@ function Network(networkSpec){
             }
           }
         }
+        if ( worker.state.employed ) diff.employed++; else diff.unemployed++;
       }
       timesteps++;
     }
