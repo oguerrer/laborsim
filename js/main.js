@@ -8,10 +8,11 @@ define([
   "laborflows/views/firmview",
   "laborflows/views/netinfo",
   "laborflows/controllers/simulation",
-  "laborflows/views/charts/timeseries",
-  "semanticui",
-  "ui/probabilitybar"
-], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation, TimeSeries) {
+  "laborflows/controllers/unemployment",
+  "laborflows/controllers/volatility",
+  "laborflows/controllers/beveridge",
+  "semanticui"
+], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation, UnemploymentChart, VolatilityChart, Beveridge) {
 
 $(window).resize(function() {
   $("svg")
@@ -89,22 +90,22 @@ $("#network-info .add-firm").click(function() {
   lastRandFirm++;
 });
 
-var ts = new TimeSeries(".unemployment-rate svg", {range: [0,1], series: {UR: {label: "Unemployment rate"}}});
-$(".unemployment-rate .recycle").click(function() {
-  ts.reset();
-});
-$(".unemployment-rate .history").click(function() {
-  if (ts.timeFrame()){
-    ts.noTimeFrame();
-    $(this).removeClass("blue");
+
+var uchart = new UnemploymentChart(".unemployment-rate", network);
+
+var vchart = new VolatilityChart(".unemployment-volatility", network);
+
+$(".unemployment-volatility .lock").click(function() {
+  var btn = $(this);
+  btn.toggleClass("black");
+  if ( btn.hasClass("black") ) {
+    vchart.metric().timeWindow(uchart.chart().timeFrame());
   } else {
-    ts.clipTimeFrame();
-    $(this).addClass("blue");
+    vchart.metric().timeWindow(100);
   }
-});
-network.on("simulationStep", function() {
-  ts.addPoint({UR: network.numOfEmployees().unemployed / network.numOfAffiliates()});
-});
+}).click();
+
+var bvchart = new Beveridge(".beveridge", network);
 
 $(".with.popup").popup();
 
@@ -131,6 +132,6 @@ $(window).keydown(function( event ) {
 
 console.log("LaborFlows rocks");
 
-return {net: network, netview: netview, chart: ts};
+return {net: network, netview: netview};
 
 });
