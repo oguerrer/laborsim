@@ -58,8 +58,8 @@ function ScatterPlot (svg, options) {
 
   var xMinRange = options.xMinRange || [undefined, undefined],
       yMinRange = options.yMinRange || [undefined, undefined],
-      xDomain = xMinRange,
-      yDomain = yMinRange;
+      xDomain = _(xMinRange).clone(),
+      yDomain = _(yMinRange).clone();
 
   var chart = svg
         .append("g")
@@ -214,8 +214,8 @@ function ScatterPlot (svg, options) {
   };
 
   this.reset = function() {
-    xDomain = xMinRange;
-    yDomain = yMinRange;
+    xDomain = _(xMinRange).clone();
+    yDomain = _(yMinRange).clone();
     for ( var s in series )
       series[s].data.splice(0);
     _updateChart();

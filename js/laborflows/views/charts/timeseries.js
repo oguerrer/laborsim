@@ -55,7 +55,7 @@ function TimeSeries (svg, options) {
   range = rangeMode === AUTO_RANGE ? [0,1] : d3.extent(options.range);
 
   var minRange = options.minRange || [undefined, undefined],
-      yDomain = minRange;
+      yDomain = _(minRange).clone();
 
   var chart = svg
         .append("g")
@@ -249,7 +249,7 @@ function TimeSeries (svg, options) {
 
   this.reset = function() {
     time = 0;
-    yDomain = minRange;
+    yDomain = _(minRange).clone();
     data.splice(0);
     _updateChart();
     return this;
