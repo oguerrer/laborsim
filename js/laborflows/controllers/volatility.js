@@ -44,6 +44,7 @@ function VolatilityChart (domNode, network, options) {
 
   this.destroy = function() {
     metric.destroy();
+    chart.destroy();
   };
 }
 

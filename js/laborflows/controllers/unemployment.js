@@ -35,6 +35,7 @@ function UnemploymentChart (domNode, network, options) {
 
   this.destroy = function() {
     network.off("simulationStep", _onStep);
+    chart.destroy();
   };
 
   this.chart = function() {return chart;};

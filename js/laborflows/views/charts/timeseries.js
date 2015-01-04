@@ -250,8 +250,8 @@ function TimeSeries (svg, options) {
     return this;
   };
 
-  this.reset = function() {
-    time = 0;
+  this.reset = function(initTime) {
+    time = initTime || 0;
     yDomain = _(minRange).clone();
     data.splice(0);
     _updateChart();
@@ -272,9 +272,12 @@ function TimeSeries (svg, options) {
 
   this.localCoord = function(pt) {return {x: x(pt.x), y: y(pt.y)};};
 
-  $(window).resize(function() {
-    _updateChart();
-  });
+  this.destroy = function() {
+    $(window).off("resize", _updateChart);
+    chart.remove();
+  };
+
+  $(window).resize(_updateChart);
 }
 
 return TimeSeries;

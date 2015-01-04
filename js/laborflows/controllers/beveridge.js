@@ -30,6 +30,7 @@ function Beveridge (domNode, network, options) {
 
   $domNode.find(".recycle").click(function() {
     chart.removeSeries();
+    chart.reset();
     series = -1;
     _bvAddSeries();
   });
@@ -65,6 +66,12 @@ function Beveridge (domNode, network, options) {
     samplingInterval = Math.abs(i);
     time = Math.min(time, samplingInterval);
     return this;
+  };
+
+  this.destroy = function() {
+    network.off("simulationStep", _bvUpdate);
+    network.off("networkChange", _bvAddSeries);
+    chart.destroy();
   };
 
   network.on("simulationStep", _bvUpdate);

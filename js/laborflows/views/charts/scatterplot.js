@@ -246,9 +246,12 @@ function ScatterPlot (svg, options) {
 
   this.localCoord = function(pt) {return {x: x(pt.x), y: y(pt.y)};};
 
-  $(window).resize(function() {
-    _updateChart();
-  });
+  this.destroy = function() {
+    $(window).off("resize", _updateChart);
+    chart.remove();
+  };
+
+  $(window).resize(_updateChart);
 }
 
 return ScatterPlot;
