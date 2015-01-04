@@ -14,6 +14,7 @@ var DEFAULT_OPTIONS = {
       right: 10,
       bottom: 20,
       left: 20,
+      initTime: 0,
       range: "auto",
       minRange: [undefined, undefined],
       timeFrame: undefined
@@ -38,7 +39,7 @@ function TimeSeries (svg, options) {
   if (options === undefined) options = {};
   _(options).defaults(DEFAULT_OPTIONS);
 
-  var time = 0;
+  var time = +options.initTime;
 
   var width, height,
       margin = {
@@ -175,6 +176,8 @@ function TimeSeries (svg, options) {
   }
 
   this.refresh = _updateChart;
+
+  this.time = function() {return time;};
 
   this.clipTimeFrame = function() {
     timeFrame = data.length;
