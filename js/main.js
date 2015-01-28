@@ -107,6 +107,30 @@ $(".unemployment-volatility .lock").click(function() {
 
 var bvchart = new Beveridge(".beveridge", network);
 
+
+$("#search-bar")
+  .on("focusin", function() {$(this).width(200).addClass("focus");})
+  .on("mouseenter", function() {$(this).width(200);})
+  .on("mouseout", function() {$(this).width($(this).hasClass("focus") ? 200 : 100);})
+  .on("focusout", function() {$(this).width(100).removeClass("focus").find("input").val("");});
+$("#search-bar input").on("keydown", function( event ) {
+  event.stopPropagation();
+  if (event.keyCode == 27) { // ESC
+    this.blur();
+  } else if (event.keyCode == 13) { // ENTER
+    event.preventDefault();
+    var sel = [];
+    var query = $(this).val();
+    var firms = network.firms();
+    for(var i in firms){
+      if (firms[i].id().search(query) != -1) {
+        sel.push(firms[i].id());
+      }
+    }
+    netview.select(sel);
+  }
+});
+
 $(".with.popup").popup();
 
 $(window).keydown(function( event ) {
@@ -124,6 +148,13 @@ $(window).keydown(function( event ) {
           else
             netview.select(network.firms());
           event.preventDefault();
+        }
+        break;
+      }
+      case 70: { // find
+        if (event.ctrlKey) {
+          event.preventDefault();
+          $("#search-bar input").focus();
         }
         break;
       }
