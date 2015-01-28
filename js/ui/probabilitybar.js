@@ -25,9 +25,11 @@
 
       if ( this._dragging ) return this;
 
-      this.options.value = p;
       this.options.mixed = false;
-      this._update();
+      if ( this.options.value != p ) {
+        this.options.value = p;
+        this._update();
+      }
       return this;
     },
 
