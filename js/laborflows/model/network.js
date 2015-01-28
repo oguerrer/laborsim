@@ -549,7 +549,7 @@ Network.prototype.defaultFirmSpec = {
   isHiring: true,
 };
 Network.prototype.defaultWorkerSpec = {
-  searchingProb: 0.5,
+  searchingProb: 1,
   employed: true
 };
 
