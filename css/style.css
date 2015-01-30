@@ -186,10 +186,23 @@ html {
 .chart-line {
   fill: none;
   /*stroke: #4682B4;*/
-  stroke-width: 1.5px;
+  stroke-width: 1px;
 }
 .chart-line:hover {
   stroke-width: 3px;
+}
+
+/* Unemployment Rate */
+.chart-line.UR {
+  stroke: #4682B4;
+}
+/* Unemployment Volatility */
+.chart-line.UV {
+  stroke: #4682B4;
+}
+/* Steady State */
+.chart-line.SS {
+  stroke: red;
 }
 
 .ui.cards > .card > .chart,

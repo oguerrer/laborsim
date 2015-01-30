@@ -155,7 +155,7 @@ function ScatterPlot (svg, options) {
       series[s].dots.exit().remove();
       series[s].dots.enter()
         .append("circle")
-        .attr("class", "chart-dot")
+        .attr("class", "chart-dot "+s)
         .attr("r", radius)
         .attr("fill", series[s].color)
         .append("title").text(series[s].label);

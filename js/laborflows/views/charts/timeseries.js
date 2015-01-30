@@ -20,7 +20,7 @@ var DEFAULT_OPTIONS = {
       timeFrame: undefined
     };
 
-var DEFAULT_COLOR = "#4682B4";
+// var DEFAULT_COLOR = "#4682B4";
 
 function _min (a, b) {
   var m = _.min([a, b]);
@@ -109,7 +109,7 @@ function TimeSeries (svg, options) {
     opt = opt || {};
     _(opt).defaults({
       label: (name+""),
-      color: DEFAULT_COLOR,
+      // color: DEFAULT_COLOR,
       data: [],
     });
 
@@ -125,8 +125,8 @@ function TimeSeries (svg, options) {
          .append("path")
          .on("mouseover", _setTitle(name))
          .on("mouseout", _unsetTitle)
-         .attr("class", "chart-line")
-         .style("stroke", opt.color);
+         .attr("class", "chart-line "+name);
+         // .style("stroke", opt.color);
 
     if ( opt.class ) opt.path.classed(opt.class, true);
 
