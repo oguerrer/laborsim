@@ -20,15 +20,12 @@ function UnemploymentMetrics (network, options) {
 
   var n, mean, M2, data;
 
-  _reset();
-
   function _reset () {
     n = 0;
     mean = 0;
     M2 = 0;
     data = [];
   }
-
 
   function _addPoint(x){
       n = n + 1;
@@ -89,13 +86,14 @@ function UnemploymentMetrics (network, options) {
 
   this.destroy = function() {
     network.off("simulationStep", _onStep);
-    network.off("networkChange", _reset);
   };
 
-  network.on("simulationStep", _onStep);
-  network.on("networkChange", _reset);
-
   events(this, ["change", "reset"]);
+
+  _reset();
+  _onStep(network.numOfEmployees());
+
+  network.on("simulationStep", _onStep);
 
 }
 
