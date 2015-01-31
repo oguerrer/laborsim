@@ -205,47 +205,96 @@ function Network(networkSpec){
     workforce[id] = worker;
   }
 
-  function _firmParam (id, k, v){
+  function _firmParam (ids, k, v){
     if ( arguments.length < 1 || arguments.length > 3)
       throw Error("Wrong arguments to get/set firm parameters");
-    firm = _lookupFirm(id);
-    if( !k )
-      return _(firms[id].param).clone();
-    if ( _(firms[id].param).has(k) ){
-      var old = firms[id].param[k];
-      if ( v !== undefined ){
-        if ( old != v ) {
-          firms[id].param[k] = v;
-          firm.trigger("changed", {param: k, from: old, to: v});
-          var diff = {}; diff[firm.id()] = firm;
-          _notifyChange({firmsChanged: diff});
-        }
-        return this;
+
+    if (!_(ids).isArray()) {
+      if ( !k ) {
+        // no param key: return all params
+        return _(firms[ids].param).clone();
+      } else if ( _(k).isString() && !v ) {
+        // no param val: return param's current value
+        _lookupFirm(ids); // make sure firm exists
+        if ( _(firms[ids].param).has(k) ){
+          return firms[ids].param[k];
+        } else throw Error("Unknown firm parameter '"+k+"'");
+      } else {
+        // otherwise, it's a set-param operation, make sure ids is array
+        ids = [ids];
       }
-      return firms[id].param[k];
-    } else throw Error("Unknown firm parameter '"+k+"'");
+    }
+
+    var param;
+    if ( _(k).isString() ) {
+      param = {};
+      param[k] = v;
+    } else param = k;
+
+    var diff = {};
+    for ( var i in ids ) {
+      var id = ids[i];
+      var firm = _lookupFirm(id);
+      for ( k in param ) {
+        v = param[k];
+        if ( _(firms[id].param).has(k) ){
+          var old = firms[id].param[k];
+          if ( old != v ) {
+            firms[id].param[k] = v;
+            firm.trigger("changed", {param: k, from: old, to: v}); // deprecated
+            diff[firm.id()] = firm;
+          }
+        } else throw Error("Unknown firm parameter '"+k+"'");
+      }
+    }
+    _notifyChange({firmsChanged: diff});
+    return this;
   }
 
-  function _firmState (id, k, v){
+  function _firmState (ids, k, v){
     if ( arguments.length < 1 || arguments.length > 3)
       throw Error("Wrong arguments to get/set firm state");
-    firm = _lookupFirm(id);
-    if( !k )
-      return _(firms[id].state).clone();
-    if ( _(firms[id].state).has(k) ){
-      var old = firms[id].state[k];
-      if ( v !== undefined ){
-        if ( old != v ) {
-          firms[id].state[k] = v;
-          firm.trigger("changed", {state: k, from: old, to: v});
-          var diff = {}; diff[firm.id()] = firm;
-          _notifyChange({firmsChanged: diff});
+      if (!_(ids).isArray()) {
+        if ( !k ) {
+          // no param key: return all params
+          return _(firms[ids].param).clone();
+        } else if ( _(k).isString() && !v ) {
+          // no param val: return param's current value
+          _lookupFirm(ids); // make sure firm exists
+          if ( _(firms[ids].state).has(k) ){
+            return firms[ids].state[k];
+          } else throw Error("Unknown firm state '"+k+"'");
+        } else {
+          // otherwise, it's a set-param operation, make sure ids is array
+          ids = [ids];
         }
-        return this;
       }
-      return firms[id].state[k];
-    } else throw Error("Unknown firm state '"+k+"'");
-  }
+
+      var param;
+      if ( _(k).isString() ) {
+        param = {};
+        param[k] = v;
+      } else param = k;
+
+      var diff = {};
+      for ( var i in ids ) {
+        var id = ids[i];
+        var firm = _lookupFirm(id);
+        for ( k in param ) {
+          v = param[k];
+          if ( _(firms[id].state).has(k) ){
+            var old = firms[id].state[k];
+            if ( old != v ) {
+              firms[id].state[k] = v;
+              firm.trigger("changed", {state: k, from: old, to: v}); // deprecated
+              diff[firm.id()] = firm;
+            }
+          } else throw Error("Unknown firm state '"+k+"'");
+        }
+      }
+      _notifyChange({firmsChanged: diff});
+      return this;
+    }
 
   this.knowsFirm = _knownFirm;
 
@@ -273,6 +322,8 @@ function Network(networkSpec){
     }
     return firm;
   };
+  this.firmParam = _firmParam;
+  this.firmState = _firmState;
 
   this.addFirm = function(id, spec) {
     var frms = {};
