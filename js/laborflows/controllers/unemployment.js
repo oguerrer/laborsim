@@ -18,6 +18,11 @@ function UnemploymentChart (domNode, network, steadystate, options) {
     }
   });
 
+  $domNode.find(".radio").click(function() {
+    $(this).toggleClass("selected");
+    $domNode.find(".SS").css("display", $(this).hasClass("selected") ? '' : 'none');
+  });
+
   $domNode.find(".recycle").click(function() {
     chart.reset();
   });
