@@ -172,6 +172,19 @@ html {
   font-size: 100% !important;
 }
 
+.ui.cards > .card > .extra, .ui.card > .extra {
+  padding-right: .5em !important;
+  /*padding-left: 3pt !important;*/
+}
+
+.ui.cards > .card.collapsed .chart, .ui.card.collapsed .chart {
+  display: none;
+}
+
+.ui.card .extra .header {
+  cursor: pointer;
+}
+
 /*------------------------------
              Charts
 ------------------------------*/

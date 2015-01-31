@@ -107,6 +107,12 @@ $(".unemployment-volatility .lock").click(function() {
 
 var bvchart = new Beveridge(".beveridge", network);
 
+$(".card .extra .header").click(function() {
+  $(this).parent().parent().toggleClass("collapsed");
+  $(window).resize();
+});
+
+$(".with.popup").popup();
 
 $("#search-bar")
   .on("focusin", function() {$(this).width(200).addClass("focus");})
@@ -130,8 +136,6 @@ $("#search-bar input").on("keydown", function( event ) {
     netview.select(sel);
   }
 });
-
-$(".with.popup").popup();
 
 $(window).keydown(function( event ) {
   // console.log(event, event.keyCode);
