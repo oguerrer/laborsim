@@ -47,30 +47,17 @@ function FirmView(domElem, net) {
 
   fireProb.probability({
     onUserSetValue: function(p) {
-      var sel = _getSel();
-      for ( var i in sel ){
-        //* @todo optimise this to avoid multiple networkChange events
-        sel[i].param("fireProb", p);
-      }
+      network.firmParam(_getSel(), "fireProb", p);
     }
   });
   hireProb.probability({
     onUserSetValue: function(p) {
-      var sel = _getSel();
-      for ( var i in sel ){
-        //* @todo optimise this to avoid multiple networkChange events
-        sel[i].param("hireProb", p);
-      }
+      network.firmParam(_getSel(), "hireProb", p);
     }
   });
 
   selFirmInfo.find(".shutdown-firm").click(function(e){
-    var sel = _getSel();
-    for ( var i in sel ){
-      //* @todo optimise this to avoid multiple networkChange events
-      sel[i].param('fireProb', 1);
-      sel[i].param('hireProb', 0);
-    }
+    network.firmParam(_getSel(), {'fireProb': 1, 'hireProb': 0});
   });
   selFirmInfo.find(".remove-firm").click(function(e){
     network.removeFirm(_getSel());
