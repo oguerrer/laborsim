@@ -1,10 +1,10 @@
 define([
   "underscore",
   "jquery",
-  "laborflows/views/charts/timeseries"
+  "laborflows/views/charts/timeseries",
 ], function(_, $, TimeSeries){
 
-function UnemploymentChart (domNode, network, options) {
+function UnemploymentChart (domNode, network, steadystate, options) {
 
   if ( _(domNode).isString() ) domNode = d3.selectAll(domNode);
 
@@ -12,7 +12,10 @@ function UnemploymentChart (domNode, network, options) {
 
   var chart = new TimeSeries(domNode.select("svg"), {
     minRange: [0,10],
-    series: {UR: {label: "Unemployment rate"}}
+    series: {
+      UR: {label: "Unemployment rate"},
+      SS: {label: "Steady State"}
+    }
   });
 
   $domNode.find(".recycle").click(function() {
@@ -30,7 +33,10 @@ function UnemploymentChart (domNode, network, options) {
   });
 
   var _onStep = function(diff) {
-    chart.addPoint({UR: diff.unemployed / (diff.unemployed + diff.employed) * 100});
+    chart.addPoint({
+      UR: diff.unemployed / (diff.unemployed + diff.employed) * 100,
+      SS: steadystate.value().unemployment
+    });
   };
 
   this.destroy = function() {

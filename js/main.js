@@ -8,11 +8,12 @@ define([
   "laborflows/views/firmview",
   "laborflows/views/netinfo",
   "laborflows/controllers/simulation",
+  "laborflows/metrics/steadystate",
   "laborflows/controllers/unemployment",
   "laborflows/controllers/volatility",
   "laborflows/controllers/beveridge",
   "semanticui"
-], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation, UnemploymentChart, VolatilityChart, Beveridge) {
+], function(_, $, d3, Random, Network, NetView, FirmView, NetInfo, Simulation, SteadyStateMetrics, UnemploymentChart, VolatilityChart, Beveridge) {
 
 $(window).resize(function() {
   $("svg")
@@ -91,9 +92,11 @@ $("#network-info .add-firm").click(function() {
 });
 
 
-var uchart = new UnemploymentChart(".unemployment-rate", network);
+var steady = new SteadyStateMetrics(network);
 
-var vchart = new VolatilityChart(".unemployment-volatility", network);
+var uchart = new UnemploymentChart(".unemployment-rate", network, steady);
+
+var vchart = new VolatilityChart(".unemployment-volatility", network, steady);
 
 $(".unemployment-volatility .lock").click(function() {
   var btn = $(this);
