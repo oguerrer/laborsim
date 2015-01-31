@@ -74,23 +74,38 @@
           self._dragging = false;
           var bar = $(this);
           if ( bar.hasClass("disable") ) return;
-          var p = e.offsetX / bar.width();
+          if ($(e.target).attr("class") ==  "progress") return;
+          var p = self._calcProb(e, this);
           bar.find(".bar").removeClass("notransition");
           settings.onUserSetValue(p);
         });
 
         this.element.on("mousedown", function(e) {
           self._dragging = true;
+          e.preventDefault();
         });
 
         this.element.on("mousemove", function(e) {
           var bar = $(this);
           if ( e.which === 1 && !(bar.hasClass("disable")) ) {
-            var p = Math.ceil(e.offsetX / bar.width() * 100) + "%";
+            if ($(e.target).attr("class") ==  "progress") return;
+            var p = Math.ceil(self._calcProb(e, this) * 100) + "%";
             bar.find(".bar").addClass("notransition").css("width", p);
             bar.find(".progress").text(p);
           }
         });
+      },
+
+      _calcProb: function(event, elem) {
+        var x = event.offsetX;
+        // HORRIBLE HACK: when event.target is the blue bar, the offset is off by 3px (its padding)
+        if (event.target === elem) {
+          x = x - 3;
+        }
+        x = x / $(elem).width();
+        if (x < 0) x=0;
+        if (x > 1) x=1;
+        return x;
       }
   });
 
