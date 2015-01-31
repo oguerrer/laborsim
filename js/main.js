@@ -121,8 +121,9 @@ $("#search-bar")
   .on("focusin", function() {$(this).width(200).addClass("focus");})
   .on("mouseenter", function() {$(this).width(200);})
   .on("mouseout", function() {$(this).width($(this).hasClass("focus") ? 200 : 100);})
-  .on("focusout", function() {$(this).width(100).removeClass("focus").find("input").val("");});
+  .on("focusout", function() {$(this).width(100).removeClass("focus error").find("input").val("");});
 $("#search-bar input").on("keydown", function( event ) {
+  $(this).parent().removeClass("error");
   event.stopPropagation();
   if (event.keyCode == 27) { // ESC
     this.blur();
@@ -136,6 +137,7 @@ $("#search-bar input").on("keydown", function( event ) {
         sel.push(firms[i].id());
       }
     }
+    if ( sel.length == 0 ) $(this).parent().addClass("error");
     netview.select(sel);
   }
 });

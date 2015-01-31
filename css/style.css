@@ -83,6 +83,10 @@ html {
   border-color: #3b83c0;
 }
 
+#search-bar.focus.error input {
+  border-color: #dbb1b1;
+}
+
 /*******************************
         Probability Bar
 *******************************/
