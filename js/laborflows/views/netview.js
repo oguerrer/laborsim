@@ -83,7 +83,7 @@ function NetView (svg, network, config) {
       });
   container.call(zoom);
 
-  var link     = svg.append("g").selectAll(".link");
+  var link     = svg.append("g").selectAll(".firmLink");
   var firmSel  = svg.append("g").selectAll(".firmSel");
   var firmNode = svg.append("g").selectAll(".firmNode");
   var firmEmpl = svg.append("g").selectAll(".firmEmpl");
@@ -136,7 +136,7 @@ function NetView (svg, network, config) {
     link = link.data(links);
     link.exit().remove();
     link.enter().append("line")
-        .attr("class", "link");
+        .attr("class", "firmLink");
 
     firmNode = firmNode.data(firms, nodekey);
     firmNode.exit().each(function(d) {
