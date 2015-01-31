@@ -25,7 +25,7 @@ html {
     background: white;
 }
 
-.firmEmpl {
+.firmEmpl, .firmNode {
   cursor: pointer;
 }
 

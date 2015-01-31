@@ -106,6 +106,13 @@ function NetView (svg, network, config) {
     return d.firm.id();
   }
 
+  function _firmClick (d) {
+    if ( d3.event.shiftKey )
+      netview.toggleSelected(d.firm.id());
+    else
+      netview.select(d.firm.id());
+  }
+
   function refreshView () {
 
     var links = network.links(),
@@ -148,6 +155,7 @@ function NetView (svg, network, config) {
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return chroma.interpolate(d.color, "white", 0.7, "lab");})
+        .on("click", _firmClick)
         .each(function(d) {firmElems[d.firm.id()] = {unemployed: this};})
         .call(drag)
         .append("title").text(function(d) { return d.firm.id(); });
@@ -169,12 +177,7 @@ function NetView (svg, network, config) {
         .attr("cx", function(d){return d.x;})
         .attr("cy", function(d){return d.y;})
         .style("fill", function(d) {return d.color;})
-        .on("click", function(d) {
-          if ( d3.event.shiftKey )
-            netview.toggleSelected(d.firm.id());
-          else
-            netview.select(d.firm.id());
-        })
+        .on("click", _firmClick)
         .each(function(d) {
           firmElems[d.firm.id()].employed = this;
         })
