@@ -5,7 +5,7 @@ define([
 
 var DEFAULT_OPTIONS = {
   // tracking: true,
-  timeWindow: 100
+  timeWindow: 0 // val <= 1 -> no clipping
 };
 
 function UnemploymentMetrics (network, options) {
@@ -53,7 +53,7 @@ function UnemploymentMetrics (network, options) {
     var u = diff.unemployed / (diff.employed + diff.unemployed);
     _addPoint(u);
     data.push(u);
-    if ( n > timeWindow )
+    if ( timeWindow > 1 && n > timeWindow )
       _removePoint(data.shift());
     self.trigger("change", self.value());
   }
@@ -69,8 +69,8 @@ function UnemploymentMetrics (network, options) {
 
   this.timeWindow = function(tw) {
     if ( tw === undefined ) return n;
-    if ( tw > 0 ) {
-      timeWindow = tw;
+    timeWindow = +tw;
+    if ( timeWindow > 1 ) {
       while (data.length > tw) {
         _removePoint(data.shift());
       }
