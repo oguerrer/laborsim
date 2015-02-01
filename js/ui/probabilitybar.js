@@ -26,6 +26,8 @@
       if ( this._dragging ) return this;
 
       this.options.mixed = false;
+      if ( p > 1 ) p = 1;
+      else if ( p < 0 ) p = 0;
       if ( this.options.value != p ) {
         this.options.value = p;
         this._update();
@@ -40,8 +42,6 @@
 
     _update: function() {
       var p = this.options.value;
-      if ( p > 1 ) p = 1;
-      else if ( p < 0 ) p = 0;
       if ( this.options.mixed ) {
         this.element.addClass("mixed");
         this.element.progress("set percent", 100);
@@ -70,18 +70,21 @@
           this.options.mixed = this.element.hasClass("mixed");
         this._update();
 
-        this.element.on("mouseup", function(e) {
+        $("body").on("mouseup", function(e) {
+          if (self._dragging === false) return;
           self._dragging = false;
+          console.log(self._drag_elem);
           var bar = $(this);
           if ( bar.hasClass("disable") ) return;
           if ($(e.target).attr("class") ==  "progress") return;
-          var p = self._calcProb(e, this);
+          var p = self._calcProb(e, self._drag_elem);
           bar.find(".bar").removeClass("notransition");
           settings.onUserSetValue(p);
         });
 
         this.element.on("mousedown", function(e) {
           self._dragging = true;
+          self._drag_elem = this;
           e.preventDefault();
         });
 
@@ -100,7 +103,7 @@
         var x = event.offsetX;
         // HORRIBLE HACK: when event.target is the blue bar, the offset is off by 3px (its padding)
         if (event.target === elem) {
-          x = x - 3;
+          x = x - 2;
         }
         x = x / $(elem).width();
         if (x < 0) x=0;
