@@ -98,15 +98,14 @@ var uchart = new UnemploymentChart(".unemployment-rate", network, steady);
 
 var vchart = new VolatilityChart(".unemployment-volatility", network, steady);
 
-$(".unemployment-volatility .lock").click(function() {
+$(".unemployment-volatility .crop").click(function() {
   var btn = $(this);
   btn.toggleClass("black");
-  if ( btn.hasClass("black") ) {
-    vchart.metric().timeWindow(uchart.chart().timeFrame());
-  } else {
-    vchart.metric().timeWindow(100);
-  }
-}).click();
+  uchart.timeWindowEnabled(btn.hasClass("black"));
+});
+uchart.on("timeWindowChange", function(e) {
+  vchart.metric().timeWindow(e.timeWindow);
+});
 
 var bvchart = new Beveridge(".beveridge", network);
 
