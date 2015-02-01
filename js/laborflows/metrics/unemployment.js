@@ -61,7 +61,7 @@ function UnemploymentMetrics (network, options) {
   this.value = function() {
     return {
       mean: mean,
-      variance: M2/(n-1)
+      variance: n > 1 ? M2/(n-1) : 0
     };
   };
 
