@@ -148,7 +148,7 @@ function TimeSeries (svg, options) {
 
     var len = timeFrame || data.length;
 
-    x.range([0,  width]).domain( [time - len - 1, time - 1] );
+    x.range([0,  width]).domain( [time - len, time - 1] );
     y.range([height, 0]).domain( rangeMode === AUTO_RANGE ? yDomain : range );
 
     xAxis.scale(x);

@@ -27,6 +27,7 @@ function SteadyStateMetrics (network) {
       h = h / ki;
       rchi += (hi * h * ki *(1/li + 1/(h*(1-Math.pow(1-v, ki)))));
     }
+    // rchi = 1 / chi = rho / H
     var u = 0;
     for ( i in firm ) {
       var hi = firm[i].param("hireProb"),

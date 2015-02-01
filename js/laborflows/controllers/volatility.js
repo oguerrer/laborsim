@@ -15,7 +15,7 @@ function VolatilityChart (domNode, network, steadystate, options) {
       UV: {label: "Unemployment volatility"},
       // SS: {label: "Steady State"}
     },
-    minRange: [0, 0.01],
+    minRange: [0, 0.001],
     left: 40
   });
 
