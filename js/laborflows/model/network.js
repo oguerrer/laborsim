@@ -596,7 +596,7 @@ function Network(networkSpec){
 }
 
 Network.prototype.defaultFirmSpec = {
-  hireProb: 0.5, fireProb: 0.5,
+  hireProb: 0.8, fireProb: 0.1,
   isHiring: true,
 };
 Network.prototype.defaultWorkerSpec = {

@@ -36,9 +36,8 @@ var addRandomFirms = function() {
 
   for( i=0; i < N; i++ ){
     rfirms["F"+lastRandFirm] = {
-      hireProb: rand.real(0,1),
-      fireProb: rand.real(0,1),
-      isHiringProb: rand.real(0,1),
+      // hireProb: rand.real(0,1),
+      // fireProb: rand.real(0,1),
       neighbors: rand.sample(all, rand.integer(1, Math.min(3, all.length))),
       workers: [
         {num: rand.integer(10,100), employed: true},
@@ -78,9 +77,8 @@ new NetInfo("#network-info", network);
 $("#network-info .add-firm").click(function() {
   var id = "F"+lastRandFirm;
   network.addFirm(id, {
-    hireProb: rand.real(0,1),
-    fireProb: rand.real(0,1),
-    isHiringProb: rand.real(0,1),
+    // hireProb: rand.real(0,1),
+    // fireProb: rand.real(0,1),
     neighbors: netview.selected(),
     workers: [
       {num: rand.integer(10,100), employed: true},
