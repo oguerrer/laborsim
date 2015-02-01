@@ -148,7 +148,7 @@ function TimeSeries (svg, options) {
 
     var len = timeFrame || data.length;
 
-    x.range([0,  width]).domain( [time - len, time] );
+    x.range([0,  width]).domain( [time - len - 1, time - 1] );
     y.range([height, 0]).domain( rangeMode === AUTO_RANGE ? yDomain : range );
 
     xAxis.scale(x);
@@ -177,7 +177,7 @@ function TimeSeries (svg, options) {
 
   this.refresh = _updateChart;
 
-  this.time = function() {return time;};
+  this.time = function() {return time-1;};
 
   this.clipTimeFrame = function() {
     timeFrame = data.length;
@@ -227,7 +227,7 @@ function TimeSeries (svg, options) {
     var last = data.length - 1;
     data.push({});
     for ( var s in series ){
-      pt = pts[s] || (last > 0 ? data[last][s] : 0);
+      pt = pts[s] || (last >= 0 ? data[last][s] : 0);
       yDomain[0] = yDomain[0] === undefined ? pt : _min(yDomain[0], pt);
       yDomain[1] = yDomain[1] === undefined ? pt : _max(yDomain[1], pt);
       data[last+1][s] = pt;
@@ -268,9 +268,24 @@ function TimeSeries (svg, options) {
   }
   this.range = _range;
 
+  this.domain = function() {
+    return {
+      xmin: x.domain()[0],
+      xmax: x.domain()[1],
+      ymin: y.domain()[0],
+      ymax: y.domain()[1]
+    };
+  };
+
+  this.margins = function() {
+    return _(options).pick('top', 'bottom', 'left', 'right');
+  };
+
   this.chart = function() {return chart;};
+  this.svg = function() {return svg;};
 
   this.localCoord = function(pt) {return {x: x(pt.x), y: y(pt.y)};};
+  this.globalCoord = function(pt) {return {x: x.invert(pt.x), y: y.invert(pt.y)};};
 
   this.destroy = function() {
     $(window).off("resize", _updateChart);
