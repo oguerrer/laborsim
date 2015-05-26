@@ -35,9 +35,17 @@ function NetInfo(domNode, network) {
     var w = network.numOfEmployees();
     var tot = network.numOfAffiliates();
     totals.text(network.numOfFirms() + " firms, " + tot + " workers");
-    employed.text(w.employed + " (" + Math.round(w.employed/tot * 100) + "%)");
-    unemployed.text(w.unemployed + " (" + Math.round(w.unemployed/tot * 100) + "%)");
+    employed.text(w.employed + " (" + perc(w.employed, tot) + ")");
+    unemployed.text(w.unemployed + " (" + perc(w.unemployed, tot) + ")");
     isHiringProb.probability("value", network.isHiringProb());
+  }
+
+  function perc(x, tot) {
+    if (tot > 0) {
+      return Math.round(x/tot * 100) + "%";
+    } else {
+      return "– %";
+    }
   }
 
   initNetworkInfo();
