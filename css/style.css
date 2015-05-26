@@ -256,3 +256,12 @@ html {
 .ui.card > .chart:only-child > svg {
   border-radius: 0.2857rem;
 }
+
+/*******************************
+           Net Specs
+*******************************/
+
+textarea.code-editor {
+  font-family: monospace;
+  font-size: 9pt;
+}

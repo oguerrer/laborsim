@@ -14,12 +14,23 @@
         <a class="header item">
             <i class="align right small icon"></i><i class="travel icon"></i> Labor<i>flows</i>
         </a>
-        <a class="item">
-            <i class="download icon"></i> Save
+        <a class="item" id="open-export">
+            <i class="download icon"></i> Export
         </a>
-        <a class="item">
+        <div class="ui simple dropdown item" id="open-import">
             <i class="folder open icon"></i> Import
-        </a>
+            <div class="menu">
+              <a class="disabled item" id="generate-net">
+                <i class="rocket icon"></i> Generate
+              </a>
+              <a class="item" id="net-from-specs">
+                <i class="edit icon"></i> From Specs
+              </a>
+              <a class="disabled item" id="net-from-library">
+                <i class="grid layout icon"></i> From Library
+              </a>
+            </div>
+        </div>
         <a class="item">
             <i class="settings icon"></i> Settings
         </a>
@@ -184,6 +195,65 @@
               </div>
             </div>
         </div>
+    </div>
+
+    <div class="ui modal" id="net-specs">
+      <i class="close icon"></i>
+      <div class="header">
+        Create network from a specification
+      </div>
+      <div class="content">
+        <div class="ui form">
+          <div class="field">
+            <label>Your net specification:</label>
+            <textarea id="spec-input" class="code-editor"></textarea>
+          </div>
+          <div class="ui error message">
+            <div class="header">
+              <i class="warning sign icon"></i>
+              Specification is not valid JSON!
+            </div>
+            <span>Not a valid spec!</span>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="ui black button">
+          Cancel
+        </div>
+        <div class="ui positive right labeled icon button">
+          Import
+          <i class="folder open icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui modal" id="net-specs-export">
+      <i class="close icon"></i>
+      <div class="header">
+        Specification of the current network
+      </div>
+      <div class="content">
+        <div class="ui form">
+          <div class="field">
+            <textarea readonly id="spec-output" class="code-editor"></textarea>
+          </div>
+        </div>
+          <div class="ui info message">
+              <i class="info sign icon"></i>
+              Press CTRL+C (Cmd+C) to copy to clipboard
+          </div>
+      </div>
+      <div class="actions">
+<!--         <div class="ui blue right labeled icon button">
+          Save to disk
+          <i class="download icon"></i>
+        </div>
+ -->        <div class="ui positive right labeled icon button">
+          Close
+          <i class="close icon"></i>
+        </div>
+      </div>
     </div>
 </body>
 

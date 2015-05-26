@@ -141,6 +141,7 @@ $("#search-bar input").on("keydown", function( event ) {
 
 $(window).keydown(function( event ) {
   // console.log(event, event.keyCode);
+  if( event.target.type == "textarea" ) return;
   switch (event.keyCode) {
       case 8: // backspace
       case 46: { // delete
@@ -166,6 +167,44 @@ $(window).keydown(function( event ) {
       }
     }
 });
+
+$("#net-specs").modal({
+  onApprove : function() {
+    try {
+      network.resetFromSpec($.parseJSON($("#spec-input").val()));
+    } catch(e) {
+      // window.alert("Not a valid spec!");
+      $("#net-specs .error span").text(e);
+      $("#net-specs .form").addClass("error");
+      $("#net-specs .field").addClass("error");
+      return false;
+    }
+  }
+});
+$("#net-from-specs").click(function() {
+  $("#net-specs").modal("show");
+  $("#spec-input").val("");
+  $("#net-specs .form").removeClass("error");
+});
+$("#open-export").click(function() {
+  try {
+    var s = JSON.stringify(network.getSpecs(), null, 2);
+    $("#net-specs-export").modal("show");
+    $("#spec-output").val(s);
+  } catch(e) {
+    window.alert("There was an error exporting the network.");
+  }
+});
+$("#spec-input").on("input", function() {
+  $(this).closest(".field").removeClass("error")
+         .closest(".form") .removeClass("error");
+});
+$("#spec-output").focus(function() {
+    var $this = $(this);
+    setTimeout(function(){$this.select();},10);
+});
+// $('.tabular.menu .item').tab();
+
 
 console.log("LaborFlows rocks");
 
