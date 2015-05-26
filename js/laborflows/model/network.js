@@ -591,7 +591,8 @@ function Network(networkSpec){
   // @todo init code following firmsSpec
 
   // add events handling code
-  events(this, ["networkChange", "simulationStep"]);
+  events(this, ["networkReset", "networkChange", "simulationStep"]);
+
 
 }
 

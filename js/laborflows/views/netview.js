@@ -113,6 +113,12 @@ function NetView (svg, network, config) {
       netview.select(d.firm.id());
   }
 
+  function resetView () {
+    selectedFirms = {};
+    refreshView();
+    _triggerSelChange("reset");
+  }
+
   function refreshView () {
 
     var links = network.links(),
@@ -320,6 +326,7 @@ function NetView (svg, network, config) {
     _(network.firms()).each(function(f) {
       delete f.view[vid];
     });
+    network.off("networkReset", resetView);
     network.off("networkChange", refreshView);
     network.off("simulationStep", updateView);
     svg.remove();
@@ -327,6 +334,7 @@ function NetView (svg, network, config) {
 
   refreshView();
 
+  network.on("networkReset", resetView);
   network.on("networkChange", refreshView);
   network.on("simulationStep", updateView);
 }

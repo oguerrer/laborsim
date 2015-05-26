@@ -42,7 +42,7 @@ function FirmView(domElem, net) {
 
   this.selFirmInfo = function() {return selFirmInfo;};
 
-  network.on("networkChange",  updateInfo);
+  network.on(["networkReset", "networkChange"],  updateInfo);
   network.on("simulationStep", updateInfo);
 
   fireProb.probability({
@@ -150,6 +150,7 @@ function FirmView(domElem, net) {
 
   function _destroy () {
     selFirmInfo.remove();
+    network.off("networkReset",  updateInfo);
     network.off("networkChange",  updateInfo);
     network.off("simulationStep", updateInfo);
     if ( mode === TRACK_SEL )

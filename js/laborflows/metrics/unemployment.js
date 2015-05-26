@@ -86,6 +86,8 @@ function UnemploymentMetrics (network, options) {
 
   this.destroy = function() {
     network.off("simulationStep", _onStep);
+    network.off("networkReset", this.reset);
+    network.off("networkChange", this.reset);
   };
 
   events(this, ["change", "reset"]);
@@ -94,6 +96,7 @@ function UnemploymentMetrics (network, options) {
   _onStep(network.numOfEmployees());
 
   network.on("simulationStep", _onStep);
+  network.on(["networkReset", "networkChange"], this.reset);
 
 }
 

@@ -26,9 +26,10 @@ function UnemploymentChart (domNode, network, steadystate, options) {
     $domNode.find(".SS").css("display", $(this).hasClass("selected") ? '' : 'none');
   });
 
-  $domNode.find(".recycle").click(function() {
+  var _reset = function() {
     chart.reset();
-  });
+  }
+  $domNode.find(".recycle").click(_reset);
 
   $domNode.find(".history").click(function() {
     if (chart.timeFrame() !== undefined){
@@ -114,6 +115,7 @@ function UnemploymentChart (domNode, network, steadystate, options) {
 
   this.destroy = function() {
     network.off("simulationStep", _onStep);
+    steadystate.off("reset", _reset);
     chart.destroy();
   };
 
@@ -122,6 +124,7 @@ function UnemploymentChart (domNode, network, steadystate, options) {
   events(this, ["timeWindowChange"]);
 
   network.on("simulationStep", _onStep);
+  steadystate.on("reset", _reset);
 
 }
 

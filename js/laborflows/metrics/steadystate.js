@@ -45,7 +45,6 @@ function SteadyStateMetrics (network) {
   }
 
   this.reset = function() {
-    // nothing to do
     self.trigger("reset");
     return this;
   };
@@ -54,6 +53,7 @@ function SteadyStateMetrics (network) {
 
   this.destroy = function() {
     network.off("networkChange", _onChange);
+    network.off("networkReset", self.reset);
   };
 
   this.network = function() {return network;};
@@ -61,6 +61,7 @@ function SteadyStateMetrics (network) {
   events(this, ["change", "reset"]);
 
   network.on("networkChange", _onChange);
+  network.on("networkReset", this.reset);
 
   _onChange();
 }

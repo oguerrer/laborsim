@@ -22,7 +22,7 @@ function NetInfo(domNode, network) {
     }
   });
 
-  network.on("networkChange", initNetworkInfo);
+  network.on(["networkReset", "networkChange"], initNetworkInfo);
   network.on("simulationStep", updateNetworkInfo);
 
   function updateNetworkInfo (diff) {
@@ -44,6 +44,7 @@ function NetInfo(domNode, network) {
 
   this.destroy = function() {
     netinfo.remove();
+    network.off("networkReset", initNetworkInfo);
     network.off("networkChange", initNetworkInfo);
     network.off("simulationStep", updateNetworkInfo);
   };

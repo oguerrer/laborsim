@@ -28,12 +28,14 @@ function Beveridge (domNode, network, options) {
   };
   _bvAddSeries();
 
-  $domNode.find(".recycle").click(function() {
+
+  var _resetChart = function() {
     chart.removeSeries();
     chart.reset();
     series = -1;
     _bvAddSeries();
-  });
+  }
+  $domNode.find(".recycle").click(_resetChart);
 
   $domNode.find(".theme").click(function() {
     _bvAddSeries();
@@ -71,11 +73,13 @@ function Beveridge (domNode, network, options) {
   this.destroy = function() {
     network.off("simulationStep", _bvUpdate);
     network.off("networkChange", _bvAddSeries);
+    network.off("networkReset", _resetChart);
     chart.destroy();
   };
 
   network.on("simulationStep", _bvUpdate);
   network.on("networkChange", _bvAddSeries);
+  network.on("networkReset", _resetChart);
 
 }
 
