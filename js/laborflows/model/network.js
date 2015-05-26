@@ -54,6 +54,8 @@ function Network(networkSpec){
 
   var net = this;
 
+  // Firm Handle private class /////////////////////////////////////////////////
+
   function FirmHandle (id) {
     this.id = function() {return id;};
     this.view = {};
@@ -77,6 +79,10 @@ function Network(networkSpec){
       if( p !== "toString" && p !== "valueOf" && p !== "exists" ) h[p] = err;
     }
   }
+
+  ///////////////////////////////////////////////////////// End private class //
+
+  // Worker Handle private class ///////////////////////////////////////////////
 
   function WorkerHandle (firmId, id) {
     this.id = function() {return id;};
@@ -120,6 +126,118 @@ function Network(networkSpec){
     }
     return w.state[s];
   };
+
+  ///////////////////////////////////////////////////////// End private class //
+
+  function append(a, b){
+    a.push.apply(a, b);
+  }
+
+  function _initFromSpec (spec) {
+    firms = {};
+    workforce = {};
+    workforceLen = 0;
+    workerMarker = 0;
+    timesteps = 0;
+
+    if ( spec === undefined ) return;
+
+    spec = _(spec)//.chain()
+            // .pick("firms", "links", "isHiringProb", "firm_default", "worker_default")
+            .defaults({
+              "isHiringProb": 0.5,
+              "firms": {},
+              "links": {},
+              "firm_default": net.defaultFirmSpec,
+              "worker_default": net.defaultWorkerSpec
+            });
+
+    _( net.defaultFirmSpec ).extend(spec.firm_default);
+    _( net.defaultWorkerSpec ).extend(spec.worker_default);
+
+    isHiringProb = spec.isHiringProb;
+
+    for( var f in spec.firms ){
+      if( _unknownFirm(f) ){
+        _createFirm(f, spec.firms[f]);
+        if( _(spec.firms[f]).has('neighbors') ){
+          if ( ! _(spec.links[f]).isArray() ){
+            spec.links[f] = [];
+          }
+          append(spec.links[f], spec.firms[f].neighbors);
+        }
+      }
+    }
+
+    workforceLen = _(workforce).keys().length;
+
+    for ( f in spec.links ){
+      _addLinks(f, spec.links[f], true, true);
+    }
+  }
+
+  function _getSpecs () {
+    var spec = {};
+    spec.isHiringProb = isHiringProb;
+    spec.firm_default = net.defaultFirmSpec;
+    spec.worker_default = net.defaultWorkerSpec;
+    spec.firms = {};
+
+    var x;
+    for ( var f in firms ) {
+      spec.firms[f] = {};
+      if (firms[f].param.hireProb != spec.firm_default.hireProb)
+        spec.firms[f].hireProb = firms[f].param.hireProb;
+      if (firms[f].param.fireProb != spec.firm_default.fireProb)
+        spec.firms[f].fireProb = firms[f].param.fireProb;
+      if (firms[f].state.isHiring != spec.firm_default.isHiring)
+        spec.firms[f].isHiring = firms[f].state.isHiring;
+      x = _workersSpec(firms[f].workers, spec.worker_default);
+      if (x.length > 0)
+        spec.firms[f].workers = x;
+      x = _(firms[f].neighbors).keys().filter(function(y) {return y < f;});
+      if (x.length > 0)
+        spec.firms[f].neighbors = x;
+    }
+
+    return spec;
+  }
+
+  function _workersSpec (workers, wdefault) {
+    var wspec = {}, w;
+
+    for ( var wid in workers ) {
+      w = workforce[wid];
+      wspec[w.searchingProb] = wspec[w.searchingProb] || {};
+      wspec[w.searchingProb].searchingProb = w.searchingProb;
+      if ( w.state.employed ) {
+        wspec[w.searchingProb].employed = wspec[w.searchingProb].employed || 0;
+        wspec[w.searchingProb].employed++;
+      } else {
+        wspec[w.searchingProb].unemployed = wspec[w.searchingProb].unemployed || 0;
+        wspec[w.searchingProb].unemployed++;
+      }
+    }
+
+    var spec = [];
+
+    for ( var k in wspec ) {
+      if ( _(wspec[k]).has("employed") ) {
+        w = {num: wspec[k].employed, employed: true};
+        if (wspec[k].searchingProb != wdefault.searchingProb)
+          w.searchingProb = wspec[k].searchingProb;
+        spec.push(w);
+      }
+      if ( _(wspec[k]).has("unemployed") ) {
+        w = {num: wspec[k].unemployed, employed: false};
+        if (wspec[k].searchingProb != wdefault.searchingProb)
+          w.searchingProb = wspec[k].searchingProb;
+        spec.push(w);
+      }
+    }
+
+    return spec;
+  }
 
   function _notifyChange (arg) {
     workforceLen = _(workforce).keys().length; // optimisation
@@ -588,11 +706,17 @@ function Network(networkSpec){
 
   this.time = function() {return timesteps;};
 
-  // @todo init code following firmsSpec
+  this.resetFromSpec = function(spec) {
+    _initFromSpec(spec);
+    this.trigger("networkReset");
+  };
+
+  this.getSpecs = _getSpecs;
 
   // add events handling code
   events(this, ["networkReset", "networkChange", "simulationStep"]);
 
+  _initFromSpec(networkSpec);
 
 }
 
