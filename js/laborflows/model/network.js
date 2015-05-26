@@ -36,6 +36,14 @@ function UnknownWorker (id) {
   return Error("Unknown worker '"+id+"'");
 }
 
+var _defaultFirmSpec = {
+  hireProb: 0.8, fireProb: 0.1,
+  isHiring: true,
+};
+var _defaultWorkerSpec = {
+  searchingProb: 1,
+  employed: true
+};
 
 function Network(networkSpec){
   if (!(this instanceof Network)) {return new Network(networkSpec);}
@@ -148,8 +156,8 @@ function Network(networkSpec){
               "isHiringProb": 0.5,
               "firms": {},
               "links": {},
-              "firm_default": net.defaultFirmSpec,
-              "worker_default": net.defaultWorkerSpec
+              "firm_default": _defaultFirmSpec,
+              "worker_default": _defaultWorkerSpec
             });
 
     _( net.defaultFirmSpec ).extend(spec.firm_default);
@@ -720,14 +728,8 @@ function Network(networkSpec){
 
 }
 
-Network.prototype.defaultFirmSpec = {
-  hireProb: 0.8, fireProb: 0.1,
-  isHiring: true,
-};
-Network.prototype.defaultWorkerSpec = {
-  searchingProb: 1,
-  employed: true
-};
+Network.prototype.defaultFirmSpec = _defaultFirmSpec;
+Network.prototype.defaultWorkerSpec = _defaultWorkerSpec;
 
 return Network;
 });
