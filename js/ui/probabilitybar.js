@@ -73,7 +73,6 @@
         $("body").on("mouseup", function(e) {
           if (self._dragging === false) return;
           self._dragging = false;
-          console.log(self._drag_elem);
           var bar = $(this);
           if ( bar.hasClass("disable") ) return;
           if ($(e.target).attr("class") ==  "progress") return;
