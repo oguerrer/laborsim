@@ -18,7 +18,7 @@ function NetInfo(domNode, network) {
 
   isHiringProb.probability({
     onUserSetValue: function(p) {
-      network.isHiringProb(p);
+      network.isHiringProb(1-p); // inverted because of relabeling of bar
     }
   });
 
@@ -37,7 +37,7 @@ function NetInfo(domNode, network) {
     totals.text(network.numOfFirms() + " firms, " + tot + " workers");
     employed.text(w.employed + " (" + perc(w.employed, tot) + ")");
     unemployed.text(w.unemployed + " (" + perc(w.unemployed, tot) + ")");
-    isHiringProb.probability("value", network.isHiringProb());
+    isHiringProb.probability("value", 1-network.isHiringProb());
   }
 
   function perc(x, tot) {
