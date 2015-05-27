@@ -115,6 +115,14 @@ function NetView (svg, network, config) {
 
   function resetView () {
     selectedFirms = {};
+    link     = link.data([]);
+    firmSel  = firmSel.data([]);
+    firmNode = firmNode.data([]);
+    firmEmpl = firmEmpl.data([]);
+    link.exit().remove();
+    firmSel.exit().remove();
+    firmNode.exit().remove();
+    firmEmpl.exit().remove();
     refreshView();
     _triggerSelChange("reset");
   }
