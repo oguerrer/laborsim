@@ -90,7 +90,6 @@ function NetView (svg, network, config) {
   var meanSize = 0;
 
   var force = d3.layout.force()
-      // .charge(-40*conf.avgFirmSize)
       .charge(function(d) {return percSize(-500, -1500, d.firm.numOfAffiliates(), meanSize);})
       .alpha(5)
       .linkStrength(0.1);
@@ -141,10 +140,9 @@ function NetView (svg, network, config) {
         f.view[vid] = {
           firm: f,
           x: focus.x+200-Math.random()*400, y: focus.y+200-Math.random()*400,
-          color: colormap(nextColor())
+          color: f.color || colormap(nextColor())
         };
       }
-      // f.view[vid].color = colormap(i / firmsNum);
 
       return f.view[vid];
     });

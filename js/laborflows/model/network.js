@@ -200,6 +200,8 @@ function Network(networkSpec){
         spec.firms[f].fireProb = firms[f].param.fireProb;
       if (firms[f].state.isHiring != spec.firm_default.isHiring)
         spec.firms[f].isHiring = firms[f].state.isHiring;
+      if (firms[f].handle.color && firms[f].handle.color != spec.firm_default.color)
+        spec.firms[f].color = firms[f].handle.color;
       x = _workersSpec(firms[f].workers, spec.worker_default);
       if (x.length > 0)
         spec.firms[f].workers = x;
@@ -281,6 +283,7 @@ function Network(networkSpec){
       workers: {}
     };
     spec = _(spec || {}).defaults(net.defaultFirmSpec);
+    handle.color = spec.color;
     _updateFirmFromSpec(id, spec);
 
     return handle;
