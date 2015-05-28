@@ -88,6 +88,7 @@
         });
 
         this.element.on("mousemove", function(e) {
+          if (self._dragging === false) return;
           var bar = $(this);
           if ( e.which === 1 && !(bar.hasClass("disable")) ) {
             if ($(e.target).attr("class") ==  "progress") return;
@@ -99,7 +100,8 @@
       },
 
       _calcProb: function(event, elem) {
-        var x = event.offsetX;
+        // var x = event.offsetX;
+        var x = event.offsetX === undefined ? event.originalEvent.layerX : event.offsetX;
         // HORRIBLE HACK: when event.target is the blue bar, the offset is off by 3px (its padding)
         if (event.target === elem) {
           x = x - 2;
