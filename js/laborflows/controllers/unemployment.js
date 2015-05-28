@@ -17,14 +17,14 @@ function UnemploymentChart (domNode, network, steadystate, options) {
     minRange: [0,10],
     series: {
       UR: {label: "Unemployment rate"},
-      SS: {label: "Steady State"}
+      // SS: {label: "Steady State"}
     }
   });
 
-  $domNode.find(".radio").click(function() {
-    $(this).toggleClass("selected");
-    $domNode.find(".SS").css("display", $(this).hasClass("selected") ? '' : 'none');
-  });
+  // $domNode.find(".radio").click(function() {
+  //   $(this).toggleClass("selected");
+  //   $domNode.find(".SS").css("display", $(this).hasClass("selected") ? '' : 'none');
+  // });
 
   var _reset = function() {
     chart.reset();
@@ -106,7 +106,7 @@ function UnemploymentChart (domNode, network, steadystate, options) {
   var _onStep = function(diff) {
     chart.addPoint({
       UR: diff.unemployed / (diff.unemployed + diff.employed) * 100,
-      SS: steadystate.value().unemployment
+      // SS: steadystate.value().unemployment
     });
     if (timeRect._dragging === false){
       timeRect.update();
