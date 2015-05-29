@@ -206,7 +206,7 @@ $("#spec-output").focus(function() {
 // $('.tabular.menu .item').tab();
 
 
-console.log("LaborFlows rocks");
+console.log("LaborSim rocks");
 
 return {net: network, netview: netview};
 
