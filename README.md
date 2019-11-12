@@ -1,15 +1,15 @@
-LaborFlows
+LaborSim
 ==========
 
-Welcome to the LaborFlows Simulator Web App.
-LaborFlows is an agent based model of the labor market; this simulator allows you to play with the model by creating the setting, letting it evolve, change the parameters and observe the evolution of relevant metrics.
+Welcome to the LaborSim Simulator Web App.
+LaborSim is an agent based model of the labor market; this simulator allows you to play with the model by creating the setting, letting it evolve, change the parameters and observe the evolution of relevant metrics.
 
 This repository contains the source code of the simulator:
 
 * for the documentation see the [wiki],
 * for more about the model, see the paper (add link!)
 
-[wiki]: https://github.com/bordaigorl/laborflows/wiki
+[wiki]: https://github.com/oguerrer/laborsim/wiki
 
 
 ## Requirements
@@ -91,7 +91,7 @@ The tests can be automated. For the moment, to run the test suites you can just 
 
 ## License
 
-Copyright (C) 2014 LaborFlows group
+Copyright (C) 2014 LaborSim group
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
